@@ -31,7 +31,7 @@ export default function Projects({ repos }: ProjectsProps) {
                 href={repo.url}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex h-full flex-col bg-card p-5 transition-colors hover:bg-secondary"
+                className="card-brutal group flex h-full flex-col bg-card p-5"
               >
                 <div className="flex items-center justify-between">
                   <h3 className="font-display text-lg font-semibold tracking-tight group-hover:text-accent">

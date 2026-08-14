@@ -66,6 +66,16 @@
     -webkit-text-stroke: 1.5px hsl(0 0% 96% / 0.35);
     color: transparent;
   }
+  /* Brutalism 硬阴影卡片 hover */
+  .card-brutal {
+    transition:
+      transform 0.2s ease-out,
+      box-shadow 0.2s ease-out;
+  }
+  .card-brutal:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 hsl(var(--accent));
+  }
 }
 
 /* Entrance / scroll reveal animations */
@@ -91,12 +101,15 @@
   html {
     scroll-behavior: auto;
   }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
   .reveal {
     opacity: 1;
     transform: none;
-    transition: none;
-  }
-  .animate-blink {
-    animation: none;
   }
 }

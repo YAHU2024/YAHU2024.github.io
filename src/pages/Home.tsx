@@ -4,6 +4,7 @@ import Pinned from '@/sections/Pinned'
 import Projects from '@/sections/Projects'
 import Stack from '@/sections/Stack'
 import Footer from '@/sections/Footer'
+import ScrollProgress from '@/components/ScrollProgress'
 import { useGitHub } from '@/hooks/useGitHub'
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <ScrollProgress />
       <Nav />
       <main>
         <Hero followers={followers} publicRepos={publicRepos} live={live} />

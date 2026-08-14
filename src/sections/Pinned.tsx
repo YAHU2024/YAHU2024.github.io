@@ -26,7 +26,7 @@ export default function Pinned({ repos }: PinnedProps) {
                 href={repo.url}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex h-full flex-col bg-card p-6 transition-colors hover:bg-secondary"
+                className="card-brutal group flex h-full flex-col bg-card p-6"
               >
                 <div className="flex items-start justify-between">
                   <span className="font-mono text-xs text-muted-foreground">

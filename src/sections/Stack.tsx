@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { languageColors, type Repo } from '@/data/github'
 import Reveal from '@/components/Reveal'
 
@@ -7,6 +7,26 @@ interface StackProps {
 }
 
 export default function Stack({ repos }: StackProps) {
+  const barsRef = useRef<HTMLDivElement>(null)
+  const [barsStarted, setBarsStarted] = useState(false)
+
+  // A5: 进入视口后触发条形图从 0 生长
+  useEffect(() => {
+    const el = barsRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setBarsStarted(true)
+          io.disconnect()
+        }
+      },
+      { threshold: 0.3 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
   const languages = useMemo(() => {
     const counts = new Map<string, number>()
     for (const r of repos) {
@@ -32,8 +52,8 @@ export default function Stack({ repos }: StackProps) {
 
         <div className="mt-10 grid gap-12 md:grid-cols-2">
           <Reveal delay={100}>
-            <div className="space-y-4">
-              {languages.map(([lang, count]) => (
+            <div ref={barsRef} className="space-y-4">
+              {languages.map(([lang, count], i) => (
                 <div key={lang}>
                   <div className="mb-1.5 flex items-center justify-between font-mono text-xs">
                     <span className="flex items-center gap-2">
@@ -47,9 +67,10 @@ export default function Stack({ repos }: StackProps) {
                   </div>
                   <div className="h-3 border bg-background">
                     <div
-                      className="h-full transition-[width] duration-700"
+                      className="h-full transition-[width] duration-700 ease-out"
                       style={{
-                        width: `${(count / max) * 100}%`,
+                        width: barsStarted ? `${(count / max) * 100}%` : '0%',
+                        transitionDelay: `${i * 100}ms`,
                         background: languageColors[lang] ?? '#8b8b93',
                       }}
                     />

@@ -1,6 +1,13 @@
+import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
+import { SplitText } from 'gsap/SplitText'
 import { ArrowDown, Github } from 'lucide-react'
 import { profile } from '@/data/github'
 import Reveal from '@/components/Reveal'
+import CountUp from '@/components/CountUp'
+import Magnetic from '@/components/Magnetic'
+
+gsap.registerPlugin(SplitText)
 
 interface HeroProps {
   followers: number
@@ -9,11 +16,33 @@ interface HeroProps {
 }
 
 export default function Hero({ followers, publicRepos, live }: HeroProps) {
-  const stats = [
-    { label: '公开仓库', value: String(publicRepos) },
-    { label: '近一年贡献', value: String(profile.contributionsLastYear) },
-    { label: '关注者', value: String(followers) },
-    { label: '加入 GitHub', value: profile.createdAt.slice(0, 4) },
+  const headlineRef = useRef<HTMLHeadingElement>(null)
+
+  // B1: 字符级拆分入场动画（expo.out），reduced-motion 下直接呈现最终态
+  useEffect(() => {
+    const el = headlineRef.current
+    if (!el) return
+    const mm = gsap.matchMedia()
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const split = new SplitText(el.querySelectorAll('.headline-line'), { type: 'chars' })
+      gsap.from(split.chars, {
+        opacity: 0,
+        y: 20,
+        rotateX: -40,
+        duration: 0.6,
+        stagger: 0.015,
+        ease: 'expo.out',
+      })
+      return () => split.revert()
+    })
+    return () => mm.revert()
+  }, [])
+
+  const stats: { label: string; value: number }[] = [
+    { label: '公开仓库', value: publicRepos },
+    { label: '近一年贡献', value: profile.contributionsLastYear },
+    { label: '关注者', value: followers },
+    { label: '加入 GitHub', value: Number(profile.createdAt.slice(0, 4)) },
   ]
 
   return (
@@ -38,39 +67,47 @@ export default function Hero({ followers, publicRepos, live }: HeroProps) {
           </div>
         </Reveal>
 
-        <Reveal delay={100}>
-          <h1 className="font-display text-[13vw] font-bold leading-[0.95] tracking-tight md:text-8xl">
-            {profile.headline.map((line, i) => (
-              <span key={line + i} className={`block ${i % 2 === 1 ? 'text-outline' : ''}`}>
-                {line}
-              </span>
-            ))}
-          </h1>
-        </Reveal>
+        <h1
+          ref={headlineRef}
+          className="font-display text-[13vw] font-bold leading-[0.95] tracking-tight md:text-8xl"
+        >
+          {profile.headline.map((line, i) => (
+            <span
+              key={line + i}
+              className={`headline-line block ${i % 2 === 1 ? 'text-outline' : ''}`}
+            >
+              {line}
+            </span>
+          ))}
+        </h1>
 
-        <Reveal delay={200}>
+        <Reveal delay={150}>
           <div className="mt-10 max-w-2xl border-l-2 border-accent pl-6">
             <p className="text-lg font-medium leading-relaxed md:text-xl">{profile.tagline}</p>
             <p className="mt-3 font-mono text-sm text-muted-foreground">{profile.subtitle}</p>
           </div>
         </Reveal>
 
-        <Reveal delay={300}>
+        <Reveal delay={250}>
           <div className="mt-10 flex flex-wrap gap-4">
-            <a
-              href="#pinned"
-              className="flex items-center gap-2 border bg-foreground px-6 py-3 font-mono text-sm font-semibold text-background transition-transform hover:-translate-y-0.5"
-            >
-              查看项目 <ArrowDown className="h-4 w-4" />
-            </a>
-            <a
-              href={profile.htmlUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 border px-6 py-3 font-mono text-sm transition-colors hover:border-accent hover:text-accent"
-            >
-              <Github className="h-4 w-4" /> GITHUB
-            </a>
+            <Magnetic>
+              <a
+                href="#pinned"
+                className="flex items-center gap-2 border bg-foreground px-6 py-3 font-mono text-sm font-semibold text-background"
+              >
+                查看项目 <ArrowDown className="h-4 w-4" />
+              </a>
+            </Magnetic>
+            <Magnetic>
+              <a
+                href={profile.htmlUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 border px-6 py-3 font-mono text-sm transition-colors hover:border-accent hover:text-accent"
+              >
+                <Github className="h-4 w-4" /> GITHUB
+              </a>
+            </Magnetic>
           </div>
         </Reveal>
       </div>
@@ -82,7 +119,9 @@ export default function Hero({ followers, publicRepos, live }: HeroProps) {
               key={s.label}
               className={`px-6 py-6 ${i > 0 ? 'border-l' : ''} ${i >= 2 ? 'max-md:border-t max-md:border-l-0' : ''} ${i === 3 ? 'max-md:border-l' : ''}`}
             >
-              <div className="font-display text-3xl font-bold md:text-4xl">{s.value}</div>
+              <div className="font-display text-3xl font-bold md:text-4xl">
+                <CountUp value={s.value} duration={1000 + i * 150} />
+              </div>
               <div className="mt-1 font-mono text-xs tracking-widest text-muted-foreground">
                 {s.label}
               </div>
