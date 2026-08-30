@@ -33,7 +33,7 @@ export default function Footer({ live }: FooterProps) {
             <Github className="h-4 w-4" /> GitHub
           </a>
           <a
-            href="mailto:hello@example.com"
+            href="mailto:yahu_bumahu@qq.com"
             className="flex items-center gap-1.5 transition-colors hover:text-foreground"
           >
             <Mail className="h-4 w-4" /> Email
