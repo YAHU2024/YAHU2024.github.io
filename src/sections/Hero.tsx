@@ -21,6 +21,16 @@ function latestUpdatedDays(repos: { updatedAt: string | null }[]): number | null
   return Math.max(0, Math.floor((Date.now() - new Date(latest).getTime()) / 86_400_000))
 }
 
+/** 人性化的相对时间：0→今天、1→昨天、一周内→N 天前、一月内→N 周前、更久→N 个月前 */
+function formatLatestUpdated(days: number | null): string {
+  if (days === null) return '—'
+  if (days === 0) return '今天'
+  if (days === 1) return '昨天'
+  if (days < 7) return `${days} 天前`
+  if (days < 30) return `${Math.floor(days / 7)} 周前`
+  return `${Math.floor(days / 30)} 个月前`
+}
+
 export default function Hero({ publicRepos, repos }: HeroProps) {
   const line1Ref = useRef<HTMLSpanElement>(null)
   const line2Ref = useRef<HTMLSpanElement>(null)
@@ -88,7 +98,7 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
                 <div className="mt-0.5 text-xs font-semibold text-muted">年度提交</div>
               </div>
               <div className="border-l py-1 pl-7" style={{ borderColor: 'var(--line)' }}>
-                <div className="text-2xl font-extrabold">{days !== null ? `${days} 天前` : '—'}</div>
+                <div className="text-2xl font-extrabold">{formatLatestUpdated(days)}</div>
                 <div className="mt-0.5 text-xs font-semibold text-muted">最近更新</div>
               </div>
             </div>
