@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # 每天定时重建：构建时脚本会刷新 GitHub 数据快照（贡献数/仓库/粉丝）
+  schedule:
+    - cron: '17 22 * * *'
 
 permissions:
   pages: write
@@ -23,6 +26,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: 刷新 GitHub 数据快照
+        run: node scripts/fetch-github.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

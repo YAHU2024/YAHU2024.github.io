@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { profile, snapshotRepos, type Repo } from '@/data/github'
+import { profile, snapshot, snapshotRepos, type Repo } from '@/data/github'
 
 interface GitHubState {
   repos: Repo[]
@@ -38,8 +38,8 @@ function mapRepo(r: ApiRepo): Repo {
 export function useGitHub(): GitHubState {
   const [state, setState] = useState<GitHubState>({
     repos: snapshotRepos,
-    followers: profile.followers,
-    publicRepos: profile.publicRepos,
+    followers: snapshot.user.followers,
+    publicRepos: snapshot.user.public_repos,
     live: false,
   })
 

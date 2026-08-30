@@ -1,133 +1,123 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
-import { SplitText } from 'gsap/SplitText'
 import { ArrowDown, Github } from 'lucide-react'
-import { profile } from '@/data/github'
-import Reveal from '@/components/Reveal'
+import { profile, snapshot } from '@/data/github'
+import CatCard from '@/components/CatCard'
 import CountUp from '@/components/CountUp'
-import Magnetic from '@/components/Magnetic'
-
-gsap.registerPlugin(SplitText)
+import Reveal from '@/components/Reveal'
 
 interface HeroProps {
-  followers: number
   publicRepos: number
-  live: boolean
+  repos: { updatedAt: string | null }[]
 }
 
-export default function Hero({ followers, publicRepos, live }: HeroProps) {
-  const headlineRef = useRef<HTMLHeadingElement>(null)
+function latestUpdatedDays(repos: { updatedAt: string | null }[]): number | null {
+  const latest = repos
+    .map((r) => r.updatedAt)
+    .filter((d): d is string => Boolean(d))
+    .sort()
+    .at(-1)
+  if (!latest) return null
+  return Math.max(0, Math.floor((Date.now() - new Date(latest).getTime()) / 86_400_000))
+}
 
-  // B1: 字符级拆分入场动画（expo.out），reduced-motion 下直接呈现最终态
+export default function Hero({ publicRepos, repos }: HeroProps) {
+  const line1Ref = useRef<HTMLSpanElement>(null)
+  const line2Ref = useRef<HTMLSpanElement>(null)
+  const days = latestUpdatedDays(repos)
+
+  // 入场：标题两行轻量上浮（Reduced-motion 下直接呈现最终态）
   useEffect(() => {
-    const el = headlineRef.current
-    if (!el) return
-    const mm = gsap.matchMedia()
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      const split = new SplitText(el.querySelectorAll('.headline-line'), { type: 'chars' })
-      gsap.from(split.chars, {
-        opacity: 0,
-        y: 20,
-        rotateX: -40,
-        duration: 0.6,
-        stagger: 0.015,
-        ease: 'expo.out',
-      })
-      return () => split.revert()
-    })
-    return () => mm.revert()
+    const els = [line1Ref.current, line2Ref.current].filter(
+      (el): el is HTMLSpanElement => Boolean(el),
+    )
+    if (!els.length) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    // fromTo 显式声明起止，StrictMode 双挂载下也不会停在透明态
+    const tween = gsap.fromTo(
+      els,
+      { opacity: 0, y: 26 },
+      { opacity: 1, y: 0, duration: 0.8, stagger: 0.12, ease: 'power3.out' },
+    )
+    return () => {
+      tween.kill()
+      gsap.set(els, { clearProps: 'opacity,transform' })
+    }
   }, [])
 
-  const stats: { label: string; value: number }[] = [
-    { label: '公开仓库', value: publicRepos },
-    { label: '近一年贡献', value: profile.contributionsLastYear },
-    { label: '关注者', value: followers },
-    { label: '加入 GitHub', value: Number(profile.createdAt.slice(0, 4)) },
-  ]
-
   return (
-    <section id="top" className="bg-blueprint border-b pt-14">
-      <div className="mx-auto max-w-6xl px-6 pb-16 pt-16 md:pb-24 md:pt-24">
-        <Reveal>
-          <div className="mb-8 flex items-center gap-4">
-            <img
-              src={profile.avatarUrl}
-              alt={`${profile.login} 的头像`}
-              className="h-14 w-14 border"
-            />
-            <div className="font-mono text-xs tracking-widest text-muted-foreground">
-              <div>@{profile.login}</div>
-              <div className="mt-1 flex items-center gap-2">
-                <span
-                  className={`inline-block h-2 w-2 ${live ? 'bg-green-500' : 'bg-yellow-500'}`}
+    <section id="top" className="layer-content px-6 pb-16 pt-14 md:pb-24 md:pt-24">
+      <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1.15fr_0.85fr]">
+        {/* 左：低密度信息栏 */}
+        <div>
+          <Reveal>
+            <span className="glass inline-block rounded-full px-4 py-1.5 text-sm font-bold">
+              👋 你好，我是 YAHU
+            </span>
+          </Reveal>
+          <h1 className="mt-6 text-[2.3rem] font-black leading-[1.25] tracking-wide md:text-5xl">
+            <span ref={line1Ref} className="block">
+              {profile.headline.line1}
+            </span>
+            <span ref={line2Ref} className="block">
+              {profile.headline.line2Pre}
+              <span className="text-accent" style={{ textShadow: 'var(--accent-glow)' }}>
+                {profile.headline.accent}
+              </span>
+              {profile.headline.line2Post}
+            </span>
+          </h1>
+          <Reveal delay={120}>
+            <p className="mt-5 text-lg text-muted">
+              <b className="font-bold text-foreground">{profile.tagline}</b>
+              <br />
+              {profile.subtitle}
+            </p>
+          </Reveal>
+          <Reveal delay={200}>
+            <div className="mt-8 flex flex-wrap items-center">
+              <div className="py-1 pr-7">
+                <CountUp value={publicRepos} className="text-2xl font-extrabold" />
+                <div className="mt-0.5 text-xs font-semibold text-muted">公开仓库</div>
+              </div>
+              <div className="border-l py-1 pl-7 pr-7" style={{ borderColor: 'var(--line)' }}>
+                <CountUp
+                  value={snapshot.contributionsLastYear}
+                  className="text-2xl font-extrabold"
                 />
-                {live ? 'LIVE · GITHUB API' : 'SNAPSHOT · OFFLINE'}
+                <div className="mt-0.5 text-xs font-semibold text-muted">年度提交</div>
+              </div>
+              <div className="border-l py-1 pl-7" style={{ borderColor: 'var(--line)' }}>
+                <div className="text-2xl font-extrabold">{days !== null ? `${days} 天前` : '—'}</div>
+                <div className="mt-0.5 text-xs font-semibold text-muted">最近更新</div>
               </div>
             </div>
-          </div>
-        </Reveal>
-
-        <h1
-          ref={headlineRef}
-          className="font-display text-[13vw] font-bold leading-[0.95] tracking-tight md:text-8xl"
-        >
-          {profile.headline.map((line, i) => (
-            <span
-              key={line + i}
-              className={`headline-line block ${i % 2 === 1 ? 'text-outline' : ''}`}
-            >
-              {line}
-            </span>
-          ))}
-        </h1>
-
-        <Reveal delay={150}>
-          <div className="mt-10 max-w-2xl border-l-2 border-accent pl-6">
-            <p className="text-lg font-medium leading-relaxed md:text-xl">{profile.tagline}</p>
-            <p className="mt-3 font-mono text-sm text-muted-foreground">{profile.subtitle}</p>
-          </div>
-        </Reveal>
-
-        <Reveal delay={250}>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Magnetic>
+          </Reveal>
+          <Reveal delay={280}>
+            <div className="mt-9 flex flex-wrap gap-4">
               <a
-                href="#pinned"
-                className="flex items-center gap-2 border bg-foreground px-6 py-3 font-mono text-sm font-semibold text-background"
+                href="#featured"
+                className="rounded-xl bg-accent px-6 py-3 font-bold text-[var(--accent-ink)] transition-transform hover:-translate-y-1"
+                style={{ boxShadow: '0 12px 30px rgba(0,0,0,0.18)' }}
               >
-                查看项目 <ArrowDown className="h-4 w-4" />
+                看看我的项目 <ArrowDown className="ml-1 inline h-4 w-4" />
               </a>
-            </Magnetic>
-            <Magnetic>
               <a
                 href={profile.htmlUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 border px-6 py-3 font-mono text-sm transition-colors hover:border-accent hover:text-accent"
+                className="glass flex items-center gap-2 rounded-xl px-6 py-3 font-bold transition-transform hover:-translate-y-1"
               >
-                <Github className="h-4 w-4" /> GITHUB
+                <Github className="h-4 w-4" /> GitHub
               </a>
-            </Magnetic>
-          </div>
-        </Reveal>
-      </div>
-
-      <div className="border-t">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 md:grid-cols-4">
-          {stats.map((s, i) => (
-            <div
-              key={s.label}
-              className={`px-6 py-6 ${i > 0 ? 'border-l' : ''} ${i >= 2 ? 'max-md:border-t max-md:border-l-0' : ''} ${i === 3 ? 'max-md:border-l' : ''}`}
-            >
-              <div className="font-display text-3xl font-bold md:text-4xl">
-                <CountUp value={s.value} duration={1000 + i * 150} />
-              </div>
-              <div className="mt-1 font-mono text-xs tracking-widest text-muted-foreground">
-                {s.label}
-              </div>
             </div>
-          ))}
+          </Reveal>
         </div>
+
+        {/* 右：互动猫卡 */}
+        <Reveal delay={150}>
+          <CatCard />
+        </Reveal>
       </div>
     </section>
   )

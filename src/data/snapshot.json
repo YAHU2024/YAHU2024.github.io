@@ -1,0 +1,128 @@
+{
+  "fetchedAt": "2026-08-14",
+  "contributionsLastYear": 358,
+  "user": { "followers": 2, "public_repos": 14 },
+  "repos": [
+    {
+      "name": "myTool",
+      "description": "AI 时代的学习工具：实时渲染流式输出、智能内容识别、多模式深度解析与追问轻对话、本地历史与隐私安全。",
+      "language": "C#",
+      "stargazers_count": 1,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/myTool",
+      "updated_at": "2026-08-14T00:00:00Z",
+      "topics": ["ai-tools", "csharp", "desktop-app", "dotnet", "openai", "wpf"],
+      "fork": false
+    },
+    {
+      "name": "Unarchive",
+      "description": "Turn Video Favorites into a Personal Knowledge Base",
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/Unarchive",
+      "updated_at": "2026-08-14T00:00:00Z",
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "yahu.github.io",
+      "description": null,
+      "language": null,
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/yahu.github.io",
+      "updated_at": "2026-08-14T00:00:00Z",
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "claude-skills",
+      "description": "这是一个skill合集。",
+      "language": "Shell",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/claude-skills",
+      "updated_at": "2026-07-21T00:00:00Z",
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "YaShua",
+      "description": null,
+      "language": "Vue",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/YaShua",
+      "updated_at": "2026-07-03T00:00:00Z",
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "ofcPap",
+      "description": "这是一次vibe coding 论文实践",
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/ofcPap",
+      "updated_at": "2026-05-29T00:00:00Z",
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "newthing",
+      "description": null,
+      "language": null,
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/newthing",
+      "updated_at": "2026-05-28T00:00:00Z",
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "PTCLI",
+      "description": "Cisco Packet Tracer CLI — 命令行管理 .pkt 文件和网络设备",
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/PTCLI",
+      "updated_at": null,
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "PaiSmart",
+      "description": "项目学习",
+      "language": "Java",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/PaiSmart",
+      "updated_at": null,
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "YahuDemo",
+      "description": "This is my thirst vibe coding demo.",
+      "language": "Vue",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/YahuDemo",
+      "updated_at": null,
+      "topics": [],
+      "fork": false
+    },
+    {
+      "name": "hello-world",
+      "description": "This is YAHU2024's first repository !",
+      "language": null,
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/hello-world",
+      "updated_at": null,
+      "topics": [],
+      "fork": false
+    }
+  ]
+}

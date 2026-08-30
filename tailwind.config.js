@@ -28,7 +28,8 @@ module.exports = {
           foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
+          // 次要"文字"色：直接用 hex 变量，避免与 shadcn 的表面色 --muted 混淆
+          DEFAULT: "var(--muted-text)",
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {

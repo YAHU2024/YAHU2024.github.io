@@ -25,3 +25,6 @@ dist-ssr
 
 #agent
 .workbuddy
+# design drafts & experiments (kept locally, not part of the site)
+mockups/
+proposals/

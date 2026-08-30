@@ -4,38 +4,117 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    /* Brutalist dark theme — monochrome + blue accent */
-    --background: 240 6% 4%;
-    --foreground: 0 0% 96%;
-    --card: 240 6% 5.5%;
-    --card-foreground: 0 0% 96%;
-    --popover: 240 6% 6%;
-    --popover-foreground: 0 0% 96%;
-    --primary: 0 0% 96%;
-    --primary-foreground: 240 6% 6%;
-    --secondary: 240 4% 12%;
-    --secondary-foreground: 0 0% 96%;
-    --muted: 240 4% 12%;
-    --muted-foreground: 240 5% 58%;
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5% 16%;
-    --input: 240 5% 16%;
-    --ring: 217 91% 60%;
-    --radius: 0rem;
-    --sidebar-background: 240 6% 6%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4% 12%;
-    --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 240 5% 16%;
-    --sidebar-ring: 217 91% 60%;
-  }
+/* ============================================================
+   主题系统：浅色 = 晨雾奶油 / 深色 = 午夜极光
+   data-theme 挂在 <html> 上，由 src/hooks/useTheme.ts 控制
+   ============================================================ */
+
+:root {
+  /* 浅色 · 晨雾奶油 */
+  --bg: #fbf9f4;
+  --ink: #2a2a33;
+  --muted-text: #54545f;
+  --accent: #f0653c;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(240, 101, 60, 0.12);
+  --accent-glow: none;
+  --glass: rgba(255, 255, 255, 0.58);
+  --glass-strong: rgba(255, 255, 255, 0.72);
+  --glass-solid: rgba(255, 255, 255, 0.96);
+  --gborder: rgba(42, 42, 51, 0.1);
+  --glow-inner: rgba(255, 255, 255, 0.85);
+  --line: rgba(42, 42, 51, 0.08);
+  --nav-bg: rgba(251, 249, 244, 0.6);
+  --blob1: #ffd3be;
+  --blob2: #c8eedc;
+  --blob3: #dcd4fe;
+  --blob-op1: 0.6;
+  --blob-op2: 0.55;
+  --blob-op3: 0.5;
+  --cat-dim: none;
+
+  /* shadcn 兼容变量（ui 组件与 tailwind 语义色使用） */
+  --background: 40 33% 97%;
+  --foreground: 240 8% 18%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 8% 18%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 8% 18%;
+  --primary: 15 85% 59%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 20% 92%;
+  --secondary-foreground: 240 8% 18%;
+  --muted: 40 20% 92%;
+  --muted-foreground: 240 6% 35%;
+  --accent: 15 85% 59%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 40 12% 86%;
+  --input: 40 12% 86%;
+  --ring: 15 85% 59%;
+  --radius: 0.75rem;
+  --sidebar-background: 40 33% 97%;
+  --sidebar-foreground: 240 8% 18%;
+  --sidebar-primary: 15 85% 59%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 40 20% 92%;
+  --sidebar-accent-foreground: 240 8% 18%;
+  --sidebar-border: 40 12% 86%;
+  --sidebar-ring: 15 85% 59%;
+}
+
+[data-theme='dark'] {
+  /* 深色 · 午夜极光 */
+  --bg: #0a0e1a;
+  --ink: #f1f5fb;
+  --muted-text: #b9c4d8;
+  --accent: #7dd3fc;
+  --accent-ink: #072331;
+  --accent-soft: rgba(125, 211, 252, 0.12);
+  --accent-glow: 0 0 30px rgba(125, 211, 252, 0.45);
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-strong: rgba(255, 255, 255, 0.12);
+  --glass-solid: #131826;
+  --gborder: rgba(160, 170, 255, 0.25);
+  --glow-inner: rgba(255, 255, 255, 0.22);
+  --line: rgba(255, 255, 255, 0.1);
+  --nav-bg: rgba(10, 14, 26, 0.55);
+  --blob1: #7c3aed;
+  --blob2: #22d3ee;
+  --blob3: #34d399;
+  --blob-op1: 0.38;
+  --blob-op2: 0.26;
+  --blob-op3: 0.26;
+  --cat-dim: saturate(0.82) brightness(0.9);
+
+  --background: 230 35% 7%;
+  --foreground: 214 40% 96%;
+  --card: 228 28% 10%;
+  --card-foreground: 214 40% 96%;
+  --popover: 228 28% 10%;
+  --popover-foreground: 214 40% 96%;
+  --primary: 199 95% 74%;
+  --primary-foreground: 200 80% 10%;
+  --secondary: 228 20% 16%;
+  --secondary-foreground: 214 40% 96%;
+  --muted: 228 20% 16%;
+  --muted-foreground: 218 17% 74%;
+  --accent: 199 95% 74%;
+  --accent-foreground: 200 80% 10%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 228 20% 16%;
+  --input: 228 20% 16%;
+  --ring: 199 95% 74%;
+  --sidebar-background: 230 35% 7%;
+  --sidebar-foreground: 214 40% 96%;
+  --sidebar-primary: 199 95% 74%;
+  --sidebar-primary-foreground: 200 80% 10%;
+  --sidebar-accent: 228 20% 16%;
+  --sidebar-accent-foreground: 214 40% 96%;
+  --sidebar-border: 228 20% 16%;
+  --sidebar-ring: 199 95% 74%;
 }
 
 @layer base {
@@ -47,54 +126,111 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    transition: background-color 0.45s ease, color 0.45s ease;
   }
   ::selection {
-    background: hsl(var(--accent));
-    color: hsl(var(--accent-foreground));
+    background: hsl(var(--accent) / 0.35);
   }
 }
 
 @layer utilities {
-  /* Visible grid backdrop for the brutalist look */
-  .bg-blueprint {
-    background-image:
-      linear-gradient(to right, hsl(240 5% 16% / 0.35) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(240 5% 16% / 0.35) 1px, transparent 1px);
-    background-size: 56px 56px;
+  /* 磨砂玻璃面板（模糊层只用于导航/卡片/面板等小块区域） */
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--gborder);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: inset 0 1px 0 var(--glow-inner);
+    transition: background-color 0.45s ease, border-color 0.45s ease;
   }
-  .text-outline {
-    -webkit-text-stroke: 1.5px hsl(0 0% 96% / 0.35);
-    color: transparent;
-  }
-  /* Brutalism 硬阴影卡片 hover */
-  .card-brutal {
-    transition:
-      transform 0.2s ease-out,
-      box-shadow 0.2s ease-out;
-  }
-  .card-brutal:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0 hsl(var(--accent));
+  /* 无 backdrop-filter 能力时的纯色回退 */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background: var(--glass-solid);
+    }
   }
 }
 
-/* Entrance / scroll reveal animations */
+/* 背景光斑：深色=极光 / 浅色=马卡龙，随主题换色 */
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+  transition: background-color 0.6s ease, opacity 0.6s ease;
+  animation: blob-drift 14s ease-in-out infinite;
+}
+.blob-1 {
+  width: 480px;
+  height: 480px;
+  background: var(--blob1);
+  opacity: var(--blob-op1);
+  top: -10%;
+  left: -6%;
+}
+.blob-2 {
+  width: 430px;
+  height: 430px;
+  background: var(--blob2);
+  opacity: var(--blob-op2);
+  top: 30%;
+  right: -8%;
+  animation-duration: 17s;
+  animation-direction: reverse;
+}
+.blob-3 {
+  width: 400px;
+  height: 400px;
+  background: var(--blob3);
+  opacity: var(--blob-op3);
+  bottom: -10%;
+  left: 22%;
+  animation-duration: 12s;
+}
+@keyframes blob-drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(40px, 28px);
+  }
+}
+
+/* 内容层压在光斑之上 */
+.layer-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* 进入视口淡入上移 */
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
 }
 .reveal-visible {
   opacity: 1;
   transform: none;
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
+/* 猫卡：Zzz 粒子（深色主题打瞌睡） */
+.zzz-letter {
+  position: absolute;
+  font-weight: 800;
+  color: var(--accent);
+  opacity: 0;
+  pointer-events: none;
 }
-.animate-blink {
-  animation: blink 1.6s ease-in-out infinite;
+
+/* 猫卡：醒来的星星粒子 */
+.wake-star {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -111,5 +247,8 @@
   .reveal {
     opacity: 1;
     transform: none;
+  }
+  .blob {
+    animation: none;
   }
 }
