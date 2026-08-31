@@ -15,6 +15,14 @@
   --ink: #2a2a33;
   --muted-text: #54545f;
   --accent: #f0653c;
+  /* 猫徽章专用：薄玻璃水晶牌（侧壁色板在 JS 内按角度打光，此处为面/倒角/高光） */
+  --edge-hi: #ff8a66;
+  --edge-lo: #c44a26;
+  --face-base: rgba(255, 253, 250, 0.75); /* 面：玻璃色调，阻断看穿（透明集中在边缘） */
+  --badge-filter: none; /* 面背景模糊：A/B 开关，置 blur(10px) 可恢复并复现边缘锯齿 */
+  --badge-feather: rgba(240, 101, 60, 0.3); /* 边缘羽化环：置 transparent 可单点关闭做对照 */
+  --badge-hi: rgba(255, 255, 255, 0.78);
+  --badge-inset: rgba(255, 255, 255, 0.28);
   --accent-ink: #ffffff;
   --accent-soft: rgba(240, 101, 60, 0.12);
   --accent-glow: none;
@@ -82,6 +90,14 @@
   --ink: #f1f5fb;
   --muted-text: #b9c4d8;
   --accent: #7dd3fc;
+  /* 猫徽章专用 */
+  --edge-hi: #a5e3ff;
+  --edge-lo: #2f6f8c;
+  --face-base: rgba(19, 25, 40, 0.72);
+  --badge-filter: none; /* 与浅色同开关 */
+  --badge-feather: rgba(125, 211, 252, 0.28);
+  --badge-hi: rgba(255, 255, 255, 0.12);
+  --badge-inset: rgba(255, 255, 255, 0.06);
   --accent-ink: #072331;
   --accent-soft: rgba(125, 211, 252, 0.12);
   --accent-glow: 0 0 30px rgba(125, 211, 252, 0.45);
@@ -369,6 +385,201 @@
   position: absolute;
   pointer-events: none;
   opacity: 0;
+}
+
+/* ============================================================
+   猫徽章：圆形玻璃 3D 翻转（自由 X+Y）
+   ============================================================ */
+/* 透视挂在舞台上，让翻转/侧壁有真实景深；容器本身不能带 backdrop-filter，否则 3D 会被 flatten */
+.cat-stage {
+  perspective: 1000px; /* 加厚到 40px 后略放缓透视，避免边缘过度畸变 */
+}
+.badge {
+  position: relative;
+  width: 340px;
+  height: 340px;
+  margin: 0 auto;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  cursor: grab;
+  touch-action: none; /* 允许徽章内拖拽翻转，阻止页面滚动 */
+  will-change: transform;
+  z-index: 1;
+  box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.38); /* 减薄后投影相应收敛 */
+}
+.badge:active {
+  cursor: grabbing;
+}
+.badge:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent);
+}
+/* 光环（悬停时由 JS 提升 opacity） */
+.badge-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0.3;
+  pointer-events: none;
+  box-shadow: 0 0 18px var(--accent-glow);
+  transition: opacity 0.4s ease;
+}
+/* 正反两面 */
+.badge-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 融入站点玻璃语言。注意：backdrop-filter 的圆形遮罩在 Chromium 下不走抗锯齿，
+     是徽章边缘锯齿的头号嫌疑；--badge-filter 置 none 即整条链路关闭（blur(0px) 无效，仍走合成） */
+  backdrop-filter: var(--badge-filter);
+  -webkit-backdrop-filter: var(--badge-filter);
+}
+.badge-front {
+  transform: translateZ(14px);
+  border: 1px solid var(--gborder); /* 与站点 .glass 同规格 */
+  background:
+    radial-gradient(120% 120% at 30% 22%, var(--badge-hi), transparent 55%),
+    var(--face-base);
+  box-shadow:
+    /* 羽化环：外侧虚化 2px，把硬裁切边界摊成渐变，等效抗锯齿 */ 0 0 2px 0.5px
+      var(--badge-feather),
+    inset 0 1px 0 var(--glow-inner),
+    /* 站点玻璃顶部高光 */ inset 0 0 0 4px var(--glow-inner),
+    /* 前倒角亮环（半透高光，非实色金属） */ inset 0 0 26px var(--accent-soft),
+    /* 玻璃导光 */ inset 0 0 30px var(--badge-inset);
+}
+.badge-back {
+  transform: rotateY(180deg) translateZ(14px);
+  background:
+    radial-gradient(120% 120% at 70% 22%, var(--badge-hi), transparent 55%),
+    var(--face-base);
+  border: 1px solid var(--gborder);
+  box-shadow:
+    /* 背面同样羽化（翻转后可见） */ 0 0 2px 0.5px var(--badge-feather),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.22),
+    /* 后倒角暗环 */ inset 0 0 26px var(--accent-soft);
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px;
+  text-align: center;
+}
+.badge-ava {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg);
+  /* 头像嵌入亚克力：内凹阴影，避免看起来是贴上去的贴纸 */
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.24);
+}
+.badge-ava-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  will-change: transform;
+}
+.badge-slogan {
+  max-width: 232px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--foreground);
+}
+.badge-tech {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.badge-tech-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  margin: -17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+/* 运动期间（悬停微浮 / 翻转）关闭正反面背景模糊：
+   backdrop-filter 会在元素位移时每帧重新采样并模糊背景，是翻转卡顿主因。
+   静止时徽章不动，模糊结果可被缓存，代价归零 */
+.badge.is-moving .badge-face {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* 真 3D 侧壁：72 段拼成亚克力筒
+   尺寸（width/height/margin）与颜色均由 JS 内联注入：
+   颜色需按角度周向打光，且不能用 filter（会 flatten 掉 preserve-3d） */
+.badge-edge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+  /* 不要加 will-change：侧壁是静态的（只有父级 .badge 在转），
+     加了会强制生成 72 个合成层，纯浪费且拖慢 3D 排序 */
+}
+/* 接触投影：撑起重量感（z-index 0，位于徽章 z-index 1 之下） */
+.badge-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 288px;
+  height: 38px;
+  margin-left: -144px;
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.36), transparent 72%);
+  filter: blur(10px);
+  z-index: 0;
+  pointer-events: none;
+}
+/* 藏在徽章下一层、透过边缘玻璃隐约透色的探索装饰 */
+.badge-hidden-deco {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: blur(0.4px) saturate(1.8);
+  opacity: 0.55;
+  will-change: transform;
+}
+/* 头像图片：禁止原生拖拽，避免抢走翻转手势 */
+.badge-ava-img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 云朵泡泡（想法，徽章右上外切，左缘在徽章右缘之外 → 零重叠，尾指向徽章） */
+.cloud-bubble {
+  position: absolute;
+  top: 8px;
+  left: 366px;
+  z-index: 20;
+  width: 176px;
+  max-width: 176px;
+  padding: 14px 18px 14px 16px;
+  border-radius: 22px 22px 22px 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--foreground);
+  text-align: left;
+  transform-origin: bottom left;
 }
 
 @media (prefers-reduced-motion: reduce) {
