@@ -29,11 +29,20 @@
   --blob2: #c8eedc;
   --blob3: #dcd4fe;
   --blob4: #ffc7de;
+  --blob-cross-a1: #ffc7de;
+  --blob-cross-a2: #bde8ff;
+  --blob-cross-a3: #ffd3be;
+  --blob-cross-a4: #c8eedc;
   --blob-op1: 0.6;
   --blob-op2: 0.55;
   --blob-op3: 0.5;
   --blob-op4: 0.45;
-  --dust-op: 0.35;
+  --speed: 0.38;
+  --travel: 2.6;
+  --op-boost: 1.7;
+  --dust-speed: 0.42;
+  --dust-size: 5.5px;
+  --dust-op: 0.5;
   --cat-dim: none;
 
   /* shadcn 兼容变量（ui 组件与 tailwind 语义色使用） */
@@ -87,10 +96,19 @@
   --blob2: #22d3ee;
   --blob3: #34d399;
   --blob4: #2563eb;
+  --blob-cross-a1: #22d3ee;
+  --blob-cross-a2: #7c3aed;
+  --blob-cross-a3: #22d3ee;
+  --blob-cross-a4: #7c3aed;
   --blob-op1: 0.38;
   --blob-op2: 0.26;
   --blob-op3: 0.26;
   --blob-op4: 0.2;
+  --speed: 0.38;
+  --travel: 2.6;
+  --op-boost: 1.7;
+  --dust-speed: 0.42;
+  --dust-size: 5.5px;
   --dust-op: 0.5;
   --cat-dim: saturate(0.82) brightness(0.9);
 
@@ -157,7 +175,7 @@
   }
 }
 
-/* 背景极光场：光斑沿大轨迹游动 + 呼吸缩放，深色=极光 / 浅色=马卡龙 */
+/* 背景极光场：光斑沿大轨迹游动 + 呼吸缩放 + 双色渐变，深色=极光 / 浅色=马卡龙 */
 .blob-par {
   position: fixed;
   inset: 0;
@@ -177,37 +195,67 @@
   width: 480px;
   height: 480px;
   background: var(--blob1);
-  opacity: var(--blob-op1);
+  opacity: calc(var(--blob-op1) * var(--op-boost, 1));
   top: -12%;
   left: -8%;
-  animation: blob-path-a 19s ease-in-out infinite;
+  animation: blob-path-a calc(var(--speed, 1) * 19s) ease-in-out infinite;
 }
 .blob-2 {
   width: 430px;
   height: 430px;
   background: var(--blob2);
-  opacity: var(--blob-op2);
+  opacity: calc(var(--blob-op2) * var(--op-boost, 1));
   top: 28%;
   right: -10%;
-  animation: blob-path-b 25s ease-in-out infinite;
+  animation: blob-path-b calc(var(--speed, 1) * 25s) ease-in-out infinite;
 }
 .blob-3 {
   width: 410px;
   height: 410px;
   background: var(--blob3);
-  opacity: var(--blob-op3);
+  opacity: calc(var(--blob-op3) * var(--op-boost, 1));
   bottom: -12%;
   left: 18%;
-  animation: blob-path-c 22s ease-in-out infinite;
+  animation: blob-path-c calc(var(--speed, 1) * 22s) ease-in-out infinite;
 }
 .blob-4 {
   width: 360px;
   height: 360px;
   background: var(--blob4);
-  opacity: var(--blob-op4);
+  opacity: calc(var(--blob-op4) * var(--op-boost, 1));
   top: 58%;
   right: 14%;
-  animation: blob-path-a 28s ease-in-out infinite reverse;
+  animation: blob-path-a calc(var(--speed, 1) * 28s) ease-in-out infinite reverse;
+}
+/* B/C 档：双色交叉渐变，让色场"流动"起来 */
+.blob::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0;
+  background: var(--blob-alt, var(--blob2));
+  animation: blob-cross calc(var(--speed, 1) * 11s) ease-in-out infinite alternate;
+}
+@keyframes blob-cross {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+.blob-1 {
+  --blob-alt: var(--blob-cross-a1);
+}
+.blob-2 {
+  --blob-alt: var(--blob-cross-a2);
+}
+.blob-3 {
+  --blob-alt: var(--blob-cross-a3);
+}
+.blob-4 {
+  --blob-alt: var(--blob-cross-a4);
 }
 @keyframes blob-path-a {
   0%,
@@ -215,10 +263,12 @@
     transform: translate3d(0, 0, 0) scale(1);
   }
   33% {
-    transform: translate3d(110px, 70px, 0) scale(1.14);
+    transform: translate3d(calc(110px * var(--travel, 1)), calc(70px * var(--travel, 1)), 0)
+      scale(1.14);
   }
   66% {
-    transform: translate3d(-60px, 120px, 0) scale(0.9);
+    transform: translate3d(calc(-60px * var(--travel, 1)), calc(120px * var(--travel, 1)), 0)
+      scale(0.9);
   }
 }
 @keyframes blob-path-b {
@@ -227,10 +277,12 @@
     transform: translate3d(0, 0, 0) scale(0.94);
   }
   40% {
-    transform: translate3d(-90px, -80px, 0) scale(1.12);
+    transform: translate3d(calc(-90px * var(--travel, 1)), calc(-80px * var(--travel, 1)), 0)
+      scale(1.12);
   }
   70% {
-    transform: translate3d(70px, 60px, 0) scale(1);
+    transform: translate3d(calc(70px * var(--travel, 1)), calc(60px * var(--travel, 1)), 0)
+      scale(1);
   }
 }
 @keyframes blob-path-c {
@@ -239,14 +291,16 @@
     transform: translate3d(0, 0, 0) scale(1.06);
   }
   35% {
-    transform: translate3d(120px, -90px, 0) scale(0.88);
+    transform: translate3d(calc(120px * var(--travel, 1)), calc(-90px * var(--travel, 1)), 0)
+      scale(0.88);
   }
   70% {
-    transform: translate3d(-80px, -40px, 0) scale(1.1);
+    transform: translate3d(calc(-80px * var(--travel, 1)), calc(-40px * var(--travel, 1)), 0)
+      scale(1.1);
   }
 }
 
-/* 上升的微光尘埃：给背景加可见的"流动感" */
+/* 上升的微光尘埃：24 颗，速度/尺寸由主题变量控制 */
 .dust {
   position: fixed;
   inset: 0;
@@ -257,12 +311,13 @@
 .dust i {
   position: absolute;
   bottom: -3vh;
-  width: 3px;
-  height: 3px;
+  width: var(--dust-size, 4.5px);
+  height: var(--dust-size, 4.5px);
   border-radius: 50%;
   background: var(--accent);
   opacity: 0;
-  animation: dust-rise linear infinite;
+  animation: dust-rise calc(var(--dust-speed, 1) * var(--d, 20s)) linear infinite;
+  animation-delay: var(--delay, 0s);
 }
 @keyframes dust-rise {
   0% {

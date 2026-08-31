@@ -10,16 +10,15 @@ import ScrollProgress from '@/components/ScrollProgress'
 import { useGitHub } from '@/hooks/useGitHub'
 import { useScrollParallax } from '@/hooks/useScrollParallax'
 
-/** 尘埃粒子的确定性伪随机配置（负 delay 让页面打开时已在半空） */
+/** 尘埃粒子：满配 24 颗，负 delay 让页面打开时已在半空 */
 function useDust() {
   return useMemo(
     () =>
-      Array.from({ length: 9 }, (_, i) => ({
+      Array.from({ length: 24 }, (_, i) => ({
         left: `${(i * 11 + 5) % 96}%`,
-        size: 2 + ((i * 7) % 3),
-        duration: 16 + ((i * 5) % 14),
-        delay: -i * 3.7,
+        delay: -i * 2.3,
         sway: i % 2 ? 42 : -36,
+        d: 14 + ((i * 5) % 16),
       })),
     [],
   )
@@ -46,7 +45,7 @@ export default function Home() {
         <div className="blob blob-4" />
       </div>
 
-      {/* 上升微光尘埃 */}
+      {/* 上升微光尘埃（满配 24 颗） */}
       <div className="dust" aria-hidden>
         {dust.map((d, i) => (
           <i
@@ -54,10 +53,8 @@ export default function Home() {
             style={
               {
                 left: d.left,
-                width: d.size,
-                height: d.size,
-                animationDuration: `${d.duration}s`,
-                animationDelay: `${d.delay}s`,
+                '--d': `${d.d}s`,
+                '--delay': `${d.delay}s`,
                 '--sway': `${d.sway}px`,
               } as React.CSSProperties
             }
