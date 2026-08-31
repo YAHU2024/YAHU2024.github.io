@@ -13,13 +13,13 @@ export default function Nav() {
           YAHU<span className="text-accent">.</span>
         </a>
         <nav className="flex items-center gap-6 text-[0.95rem] font-semibold text-muted">
-          <a href="#featured" className="hidden transition-colors hover:text-foreground sm:block">
+          <a href="#featured" className="nav-link hidden sm:block">
             项目
           </a>
-          <a href="#toolbox" className="hidden transition-colors hover:text-foreground sm:block">
+          <a href="#toolbox" className="nav-link hidden sm:block">
             工具箱
           </a>
-          <a href="#about" className="hidden transition-colors hover:text-foreground sm:block">
+          <a href="#about" className="nav-link hidden sm:block">
             关于
           </a>
           <ThemeToggle />
@@ -27,7 +27,7 @@ export default function Nav() {
             href={profile.htmlUrl}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-bold text-[var(--accent-ink)] transition-transform hover:-translate-y-0.5"
+            className="btn-pop flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-bold text-[var(--accent-ink)]"
           >
             <Github className="h-4 w-4" />
             GitHub

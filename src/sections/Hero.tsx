@@ -107,7 +107,7 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
             <div className="mt-9 flex flex-wrap gap-4">
               <a
                 href="#featured"
-                className="rounded-xl bg-accent px-6 py-3 font-bold text-[var(--accent-ink)] transition-transform hover:-translate-y-1"
+                className="btn-pop rounded-xl bg-accent px-6 py-3 font-bold text-[var(--accent-ink)]"
                 style={{ boxShadow: '0 12px 30px rgba(0,0,0,0.18)' }}
               >
                 看看我的项目 <ArrowDown className="ml-1 inline h-4 w-4" />
@@ -116,7 +116,7 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
                 href={profile.htmlUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="glass flex items-center gap-2 rounded-xl px-6 py-3 font-bold transition-transform hover:-translate-y-1"
+                className="btn-pop glass flex items-center gap-2 rounded-xl px-6 py-3 font-bold"
               >
                 <Github className="h-4 w-4" /> GitHub
               </a>

@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
 import { featured } from '@/data/github'
 import Reveal from '@/components/Reveal'
+import GlassCard from '@/components/GlassCard'
 
 export default function Featured() {
   return (
@@ -17,15 +18,15 @@ export default function Featured() {
               rel="noreferrer"
               className="text-sm font-bold text-muted transition-colors hover:text-foreground"
             >
-              全部在 GitHub →
+              全部在 GitHub <span className="ar-pop">→</span>
             </a>
           </div>
         </Reveal>
         <div className="grid gap-6 md:grid-cols-3">
           {featured.map((p, i) => (
             <Reveal key={p.name} delay={i * 100}>
-              <article className="glass group flex h-full flex-col rounded-3xl p-7 transition-all duration-300 hover:-translate-y-2 hover:bg-[var(--glass-strong)]">
-                <div className="mb-4 flex items-center justify-between">
+              <GlassCard className="h-full p-7" tilt>
+                <div className="gc-z1 mb-4 flex items-center justify-between">
                   <span
                     className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl"
                     style={{ background: 'var(--accent-soft)' }}
@@ -39,12 +40,12 @@ export default function Featured() {
                     {p.badge}
                   </span>
                 </div>
-                <h3 className="text-xl font-extrabold">
+                <h3 className="gc-z2 text-xl font-extrabold">
                   {p.name}
                   <span className="ml-2 text-xs font-semibold text-muted">{p.lang}</span>
                 </h3>
-                <p className="mt-2.5 flex-1 text-[0.95rem] leading-relaxed text-muted">{p.desc}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <p className="gc-z3 mt-2.5 flex-1 text-[0.95rem] leading-relaxed text-muted">{p.desc}</p>
+                <div className="gc-z3 mt-4 flex flex-wrap gap-2">
                   {p.tags.map((t) => (
                     <span
                       key={t}
@@ -59,11 +60,11 @@ export default function Featured() {
                   href={p.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex items-center gap-1 text-sm font-extrabold text-accent hover:underline"
+                  className="gc-z2 mt-5 inline-flex items-center gap-1 text-sm font-extrabold text-accent hover:underline"
                 >
-                  GitHub <ArrowUpRight className="h-3.5 w-3.5" />
+                  GitHub <ArrowUpRight className="ar-pop h-3.5 w-3.5" />
                 </a>
-              </article>
+              </GlassCard>
             </Reveal>
           ))}
         </div>

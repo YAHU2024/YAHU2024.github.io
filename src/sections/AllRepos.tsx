@@ -22,7 +22,7 @@ export default function AllRepos({ repos }: { repos: Repo[] }) {
               rel="noreferrer"
               className="text-sm font-bold text-muted transition-colors hover:text-foreground"
             >
-              更多 →
+              更多 <span className="ar-pop">→</span>
             </a>
           </div>
         </Reveal>
@@ -34,15 +34,17 @@ export default function AllRepos({ repos }: { repos: Repo[] }) {
                 href={r.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex flex-wrap items-center gap-x-5 gap-y-1 px-2 py-4 transition-colors hover:bg-[var(--glass-strong)] md:px-3"
-                style={{ borderRadius: 12 }}
+                className="repo-row flex flex-wrap items-center gap-x-5 gap-y-1 px-2 py-4 md:px-3"
               >
-                <span className="min-w-7 text-sm font-bold text-accent">
+                <span className="repo-idx min-w-7 text-sm font-bold text-accent">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="min-w-28 font-bold">{r.name}</span>
                 <span className="flex-1 text-sm text-muted">{r.description ?? '（还没有写描述）'}</span>
                 <span className="text-xs font-semibold text-muted">{r.language ?? '—'}</span>
+                <span className="repo-go text-sm font-extrabold" aria-hidden>
+                  →
+                </span>
               </a>
             ))}
           </div>

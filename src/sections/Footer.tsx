@@ -28,13 +28,13 @@ export default function Footer({ live }: FooterProps) {
             href={profile.htmlUrl}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            className="nav-link flex items-center gap-1.5"
           >
             <Github className="h-4 w-4" /> GitHub
           </a>
           <a
             href="mailto:yahu_bumahu@qq.com"
-            className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            className="nav-link flex items-center gap-1.5"
           >
             <Mail className="h-4 w-4" /> Email
           </a>

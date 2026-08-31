@@ -358,19 +358,6 @@
   z-index: 1;
 }
 
-/* 进入视口淡入上移 */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.6s ease-out,
-    transform 0.6s ease-out;
-}
-.reveal-visible {
-  opacity: 1;
-  transform: none;
-}
-
 /* 猫卡：Zzz 粒子（深色主题打瞌睡） */
 .zzz-letter {
   position: absolute;
@@ -583,10 +570,6 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
   .blob {
     animation: none;
   }
@@ -653,4 +636,163 @@
 .bt-top:hover .bt-top-ring,
 .bt-top:focus-visible .bt-top-ring {
   opacity: 0.5;
+}
+
+/* ============================================================
+   玻璃卡片灵动交互（GlassCard 组件，2026-08-31）
+   - 外层 .glass-card：玻璃视觉 + hover 弹性浮起 + 按压 + 光斑
+   - 内层 .glass-card-in：3D 倾斜（JS 写 transform）+ 内容深度分层
+   - .is-moving：运动期关 backdrop-filter（每帧重采样是卡顿主因）
+   ============================================================ */
+.glass-card {
+  position: relative;
+  border-radius: 24px;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+/* 弹性浮起：back.out 类 overshoot，由 cubic-bezier(.34,1.56,.64,1) 提供 */
+.glass-card:hover {
+  transform: translateY(-6px);
+  background: var(--glass-strong);
+  box-shadow: 0 18px 40px -12px rgb(0 0 0 / 0.25);
+}
+.glass-card:active {
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: 0 10px 26px -10px rgb(0 0 0 / 0.22);
+}
+/* 运动期间关闭背景模糊：位移会触发每帧重采样，静止恢复后结果可被缓存 */
+.glass-card.is-moving {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* 光斑：光标位置的径向高光，screen 混合叠在内容上 */
+.glass-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--sx, 50%) var(--sy, 30%),
+    color-mix(in srgb, var(--accent) 55%, transparent),
+    color-mix(in srgb, var(--accent) 38%, transparent) 34%,
+    transparent 60%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.glass-card:hover .glass-sheen {
+  opacity: 1;
+}
+/* 3D 运动层：JS 写入 rotateX/rotateY；preserve-3d 让内部 translateZ 有纵深 */
+.glass-card-in {
+  position: relative;
+  border-radius: inherit;
+  flex: 1;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+/* 内容深度分层（配合 tilt 使用） */
+.gc-z1 {
+  transform: translateZ(24px);
+}
+.gc-z2 {
+  transform: translateZ(40px);
+}
+.gc-z3 {
+  transform: translateZ(16px);
+}
+
+/* ============================================================
+   微交互：导航下划线生长 / 按钮弹性 / 链接箭头
+   ============================================================ */
+/* 导航链接：accent 下划线从左向右生长 */
+.nav-link {
+  position: relative;
+  padding: 4px 0;
+  transition: color 0.25s ease;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link:hover {
+  color: var(--foreground);
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+/* 按钮弹性：hover 上浮 overshoot + 按压压入 */
+.btn-pop {
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-pop:hover {
+  transform: translateY(-2px);
+}
+.btn-pop:active {
+  transform: scale(0.96);
+}
+/* 行内箭头微移：挂在图标/箭头元素上 */
+.ar-pop {
+  display: inline-block;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+a:hover .ar-pop {
+  transform: translateX(5px);
+}
+/* Toolbox 图标弹跳（hover 时轻微放大旋转） */
+.tool-emoji {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.glass-card:hover .tool-emoji {
+  transform: scale(1.15) rotate(-4deg);
+}
+
+/* ============================================================
+   全部作品行（AllRepos）：hover 背景 + 序号弹跳 + 箭头浮现
+   ============================================================ */
+.repo-row {
+  border-radius: 12px;
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s ease;
+}
+.repo-row:hover {
+  background: var(--glass-strong);
+  transform: translateX(4px);
+}
+.repo-row:active {
+  transform: scale(0.995);
+}
+.repo-row .repo-idx {
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.repo-row:hover .repo-idx {
+  transform: scale(1.2);
+}
+.repo-row .repo-go {
+  opacity: 0;
+  transform: translateX(-6px);
+  color: var(--accent);
+  transition:
+    opacity 0.25s ease,
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.repo-row:hover .repo-go {
+  opacity: 1;
+  transform: none;
 }

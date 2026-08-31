@@ -1,5 +1,6 @@
 import { toolbox } from '@/data/github'
 import Reveal from '@/components/Reveal'
+import GlassCard from '@/components/GlassCard'
 
 export default function Toolbox() {
   return (
@@ -16,11 +17,14 @@ export default function Toolbox() {
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {toolbox.map((t, i) => (
             <Reveal key={t.name} delay={i * 60}>
-              <div className="glass flex h-full flex-col items-center rounded-3xl px-4 py-6 text-center transition-transform duration-300 hover:-translate-y-1.5">
-                <span className="text-3xl">{t.emoji}</span>
+              <GlassCard
+                className="h-full px-4 py-6"
+                innerClassName="flex flex-1 flex-col items-center text-center"
+              >
+                <span className="tool-emoji text-3xl">{t.emoji}</span>
                 <span className="mt-3 text-sm font-extrabold">{t.name}</span>
                 <span className="mt-1 text-xs text-muted">{t.use}</span>
-              </div>
+              </GlassCard>
             </Reveal>
           ))}
         </div>
