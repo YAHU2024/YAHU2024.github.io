@@ -101,6 +101,18 @@ export function useCatMicro(
   const drowsyRef = useRef(drowsy)
   /** 当前"睁眼程度"：1 = 全睁，DROWSY_OPEN = 眯眼，0 = 闭合 */
   const opennessRef = useRef(1)
+  /**
+   * 缓存可复用 quickTo 实例（瞳孔 x/y、头部 rotation/x/y）。
+   * 暂停复位时须用 quickTo 自身归零，不能用 gsap.to(overwrite:'auto')——
+   * 后者会杀掉正在播放的 quickTo 可复用 tween，导致恢复后跟随永久失效。
+   */
+  const qtoRef = useRef<{
+    px: ((v: number) => void)[]
+    py: ((v: number) => void)[]
+    tiltRot: ((v: number) => void) | null
+    tiltX: ((v: number) => void) | null
+    tiltY: ((v: number) => void) | null
+  }>({ px: [], py: [], tiltRot: null, tiltX: null, tiltY: null })
 
   // 开关同步到 ref：事件回调与 rAF 里读取，避免闭包读到过期值
   useEffect(() => {
@@ -181,6 +193,8 @@ export function useCatMicro(
     const tiltRot = head ? gsap.quickTo(head, 'rotation', { duration: 0.9, ease: 'power2.out' }) : null
     const tiltX = head ? gsap.quickTo(head, 'x', { duration: 0.9, ease: 'power2.out' }) : null
     const tiltY = head ? gsap.quickTo(head, 'y', { duration: 0.9, ease: 'power2.out' }) : null
+    // 缓存可复用 tween，供"暂停时归位"调用（见下方 paused 分支）
+    qtoRef.current = { px, py, tiltRot, tiltX, tiltY }
 
     // 缓存头像矩形，避免每帧强制布局；滚动/缩放/悬停时重新测量
     let rect = svg.getBoundingClientRect()
@@ -263,10 +277,17 @@ export function useCatMicro(
     const target = opennessRef.current
     gsap.to(lidTops, { y: OPEN_TOP * target, duration: 0.2, ease: 'power2.out', overwrite: 'auto' })
     gsap.to(lidBottoms, { y: OPEN_BOTTOM * target, duration: 0.2, ease: 'power2.out', overwrite: 'auto' })
-    gsap.to(pupils, { x: 0, y: 0, duration: 0.35, ease: 'power2.out', overwrite: 'auto' })
+    // 瞳孔/头部用 quickTo 自身归位：避免 overwrite 杀掉可复用 tween 导致恢复后失效
+    const { px, py, tiltRot, tiltX, tiltY } = qtoRef.current
+    pupils.forEach((_, i) => {
+      px[i]?.(0)
+      py[i]?.(0)
+    })
     gsap.to(ears, { rotation: 0, duration: 0.3, ease: 'power2.out', overwrite: 'auto' })
     if (head) {
-      gsap.to(head, { rotation: 0, x: 0, y: 0, duration: 0.45, ease: 'power2.out', overwrite: 'auto' })
+      tiltRot?.(0)
+      tiltX?.(0)
+      tiltY?.(0)
     }
   }, [paused, rootRef])
 

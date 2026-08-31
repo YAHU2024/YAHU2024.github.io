@@ -162,8 +162,8 @@ export default function CatFace({ theme = 'light' }: { theme?: Theme }) {
 
         {/* 头部 */}
         <ellipse cx={100} cy={112} rx={68} ry={60} fill={p.fur} stroke={p.furEdge} strokeWidth={3} />
-        {/* 额头高光（额头顶部，不与眼睛/眼睑区域重叠） */}
-        <ellipse cx={92} cy={70} rx={42} ry={17} fill={p.brow} opacity={0.5} />
+        {/* 额头高光（额头顶部，收窄右移避免压到左耳；不与眼睛/眼睑区域重叠） */}
+        <ellipse cx={102} cy={70} rx={28} ry={14} fill={p.brow} opacity={0.5} />
 
         {/* 胡须 */}
         <g fill="none" stroke={p.whisker} strokeWidth={2} strokeLinecap="round">
