@@ -1,3 +1,4 @@
+import { Globe } from 'lucide-react'
 import { hiddenRepos, type Repo } from '@/data/github'
 import Reveal from '@/components/Reveal'
 
@@ -29,23 +30,39 @@ export default function AllRepos({ repos }: { repos: Repo[] }) {
         <Reveal delay={100}>
           <div className="glass rounded-3xl px-4 py-2 md:px-7">
             {list.map((r, i) => (
-              <a
+              <div
                 key={r.name}
-                href={r.url}
-                target="_blank"
-                rel="noreferrer"
-                className="repo-row flex flex-wrap items-center gap-x-5 gap-y-1 px-2 py-4 md:px-3"
+                className="repo-row flex items-center gap-x-4 px-2 py-4 md:px-3"
               >
-                <span className="repo-idx min-w-7 text-sm font-bold text-accent">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span className="min-w-28 font-bold">{r.name}</span>
-                <span className="flex-1 text-sm text-muted">{r.description ?? '（还没有写描述）'}</span>
-                <span className="text-xs font-semibold text-muted">{r.language ?? '—'}</span>
-                <span className="repo-go text-sm font-extrabold" aria-hidden>
-                  →
-                </span>
-              </a>
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1"
+                >
+                  <span className="repo-idx min-w-7 text-sm font-bold text-accent">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="min-w-28 font-bold">{r.name}</span>
+                  <span className="flex-1 text-sm text-muted">{r.description ?? '（还没有写描述）'}</span>
+                  <span className="text-xs font-semibold text-muted">{r.language ?? '—'}</span>
+                  <span className="repo-go text-sm font-extrabold" aria-hidden>
+                    →
+                  </span>
+                </a>
+                {r.homepage && (
+                  <a
+                    href={r.homepage}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="repo-live shrink-0"
+                    aria-label={`打开 ${r.name} 的项目官网`}
+                    title="项目官网"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </div>
             ))}
           </div>
         </Reveal>

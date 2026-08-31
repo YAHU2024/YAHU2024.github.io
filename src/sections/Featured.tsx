@@ -56,14 +56,26 @@ export default function Featured() {
                     </span>
                   ))}
                 </div>
-                <a
-                  href={p.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="gc-z2 mt-5 inline-flex items-center gap-1 text-sm font-extrabold text-accent hover:underline"
-                >
-                  GitHub <ArrowUpRight className="ar-pop h-3.5 w-3.5" />
-                </a>
+                <div className="gc-z2 mt-5 flex flex-wrap items-center gap-x-4 gap-y-1">
+                  {p.homepage && (
+                    <a
+                      href={p.homepage}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-sm font-extrabold text-accent hover:underline"
+                    >
+                      项目官网 <ArrowUpRight className="ar-pop h-3.5 w-3.5" />
+                    </a>
+                  )}
+                  <a
+                    href={p.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-sm font-extrabold text-accent hover:underline"
+                  >
+                    GitHub <ArrowUpRight className="ar-pop h-3.5 w-3.5" />
+                  </a>
+                </div>
               </GlassCard>
             </Reveal>
           ))}

@@ -1,7 +1,10 @@
 {
-  "fetchedAt": "2026-08-14",
+  "fetchedAt": "2026-08-31",
   "contributionsLastYear": 358,
-  "user": { "followers": 2, "public_repos": 14 },
+  "user": {
+    "followers": 2,
+    "public_repos": 14
+  },
   "repos": [
     {
       "name": "myTool",
@@ -11,8 +14,16 @@
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/myTool",
       "updated_at": "2026-08-14T00:00:00Z",
-      "topics": ["ai-tools", "csharp", "desktop-app", "dotnet", "openai", "wpf"],
-      "fork": false
+      "topics": [
+        "ai-tools",
+        "csharp",
+        "desktop-app",
+        "dotnet",
+        "openai",
+        "wpf"
+      ],
+      "fork": false,
+      "homepage": "https://yahu2024.github.io/myTool/"
     },
     {
       "name": "Unarchive",
@@ -23,7 +34,8 @@
       "html_url": "https://github.com/YAHU2024/Unarchive",
       "updated_at": "2026-08-14T00:00:00Z",
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "yahu.github.io",
@@ -34,7 +46,8 @@
       "html_url": "https://github.com/YAHU2024/yahu.github.io",
       "updated_at": "2026-08-14T00:00:00Z",
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "claude-skills",
@@ -45,7 +58,8 @@
       "html_url": "https://github.com/YAHU2024/claude-skills",
       "updated_at": "2026-07-21T00:00:00Z",
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "YaShua",
@@ -56,7 +70,8 @@
       "html_url": "https://github.com/YAHU2024/YaShua",
       "updated_at": "2026-07-03T00:00:00Z",
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "ofcPap",
@@ -67,7 +82,8 @@
       "html_url": "https://github.com/YAHU2024/ofcPap",
       "updated_at": "2026-05-29T00:00:00Z",
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "newthing",
@@ -78,7 +94,8 @@
       "html_url": "https://github.com/YAHU2024/newthing",
       "updated_at": "2026-05-28T00:00:00Z",
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "PTCLI",
@@ -89,7 +106,8 @@
       "html_url": "https://github.com/YAHU2024/PTCLI",
       "updated_at": null,
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "PaiSmart",
@@ -100,7 +118,8 @@
       "html_url": "https://github.com/YAHU2024/PaiSmart",
       "updated_at": null,
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "YahuDemo",
@@ -111,7 +130,8 @@
       "html_url": "https://github.com/YAHU2024/YahuDemo",
       "updated_at": null,
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     },
     {
       "name": "hello-world",
@@ -122,7 +142,8 @@
       "html_url": "https://github.com/YAHU2024/hello-world",
       "updated_at": null,
       "topics": [],
-      "fork": false
+      "fork": false,
+      "homepage": null
     }
   ]
 }

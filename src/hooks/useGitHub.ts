@@ -19,6 +19,7 @@ interface ApiRepo {
   updated_at: string
   topics: string[]
   fork: boolean
+  homepage: string | null
 }
 
 function mapRepo(r: ApiRepo): Repo {
@@ -31,6 +32,7 @@ function mapRepo(r: ApiRepo): Repo {
     url: r.html_url,
     updatedAt: r.updated_at?.slice(0, 10) ?? null,
     topics: r.topics ?? [],
+    homepage: r.homepage ?? null,
   }
 }
 

@@ -16,6 +16,8 @@ export interface Repo {
   url: string
   updatedAt: string | null
   topics: string[]
+  /** 项目官网（GitHub Pages 或外部站点），没有则为 null */
+  homepage: string | null
 }
 
 export const profile = {
@@ -56,6 +58,8 @@ export interface FeaturedRepo {
   desc: string
   tags: string[]
   url: string
+  /** 项目官网（有 GitHub Pages 的仓库手填） */
+  homepage?: string
 }
 
 /** 精选项目：文案手写，不用 GitHub 的 description */
@@ -69,6 +73,7 @@ export const featured: FeaturedRepo[] = [
     desc: 'AI 时代的学习工具：把资料喂给它，实时流式解读、追问轻对话，历史保存在本地，隐私放心。',
     tags: ['WPF', 'OpenAI'],
     url: 'https://github.com/YAHU2024/myTool',
+    homepage: 'https://yahu2024.github.io/myTool/',
   },
   {
     name: 'Unarchive',
@@ -111,7 +116,7 @@ export const toolbox: ToolboxItem[] = [
 ]
 
 /** 全部作品里隐藏的仓库（练习/脚手架类），比较时忽略大小写 */
-export const hiddenRepos = ['yahu.github.io', 'hello-world']
+export const hiddenRepos = ['yahu.github.io', 'YAHU2024.github.io', 'hello-world']
 
 export const languageColors: Record<string, string> = {
   'C#': '#178600',
@@ -139,6 +144,7 @@ interface SnapshotRepo {
   updated_at: string | null
   topics: string[]
   fork: boolean
+  homepage: string | null
 }
 
 export interface Snapshot {
@@ -161,4 +167,5 @@ export const snapshotRepos: Repo[] = snapshot.repos
     url: r.html_url,
     updatedAt: r.updated_at ? r.updated_at.slice(0, 10) : null,
     topics: r.topics ?? [],
+    homepage: r.homepage ?? null,
   }))

@@ -58,6 +58,7 @@ async function main() {
       updated_at: r.updated_at,
       topics: r.topics ?? [],
       fork: r.fork,
+      homepage: r.homepage ?? null,
     }))
     console.log(`[github] repos ok: ${next.repos.length} 个`)
   } catch (e) {
