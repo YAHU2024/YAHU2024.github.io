@@ -48,10 +48,11 @@ export function useTilt(
       if (Math.abs(tRX - cRX) > EPS || Math.abs(tRY - cRY) > EPS) {
         raf = requestAnimationFrame(tick)
       } else {
-        // 收敛即归零：lerp 永不精确到 0，直接清 transform + 恢复 backdrop-filter
-        cRX = cRY = 0
-        el.style.transform = ''
-        rootEl.classList.remove('is-moving')
+        // 收敛。区分两种情况：
+        // 1) 目标非零（鼠标仍在卡内静止）→ 保持当前倾斜，文字停在景深位（设计行为）
+        // 2) 目标为零（鼠标已离开）→ 回正完成，清 transform 恢复静态
+        if (tRX === 0 && tRY === 0) el.style.transform = ''
+        rootEl.classList.remove('is-moving') // 静止后恢复 backdrop-filter
       }
     }
 
@@ -61,6 +62,8 @@ export function useTilt(
       const y = (e.clientY - r.top) / r.height
       tRY = (x - 0.5) * 2 * maxTilt
       tRX = -(y - 0.5) * 2 * maxTilt
+      // 每次移动都确保挂上（上一轮 lerp 收敛可能已移除）
+      rootEl.classList.add('is-moving')
       if (!raf) raf = requestAnimationFrame(tick)
     }
     const onEnter = () => rootEl.classList.add('is-moving')
