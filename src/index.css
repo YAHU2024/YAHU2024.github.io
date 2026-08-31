@@ -594,3 +594,63 @@
     display: none;
   }
 }
+
+/* ============================================================
+   回顶按钮：右下角水晶牌小猫徽章
+   - position:fixed 固定右下角，出现/消失由 GSAP autoAlpha 驱动
+   - 复用徽章玻璃语言（--face-base / --badge-hi / --gborder / --accent）
+   - 小猫为独立小尺寸矢量（非复用 300px CatFace），右爪/右眼可动
+   ============================================================ */
+.bt-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  /* 置顶：高于正文层(.layer-content z1)与云朵泡泡(z20)，避免被遮挡 */
+  z-index: 50;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--gborder);
+  background:
+    radial-gradient(120% 120% at 32% 22%, var(--badge-hi), transparent 55%),
+    var(--face-base);
+  box-shadow:
+    0 0 2px 0.5px var(--badge-feather),
+    inset 0 1px 0 var(--glow-inner),
+    inset 0 0 0 4px var(--glow-inner),
+    inset 0 0 16px var(--accent-soft),
+    0 8px 22px -10px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform, opacity;
+}
+.bt-top:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent);
+}
+.bt-top-cat {
+  display: block;
+  width: 46px;
+  height: 46px;
+  pointer-events: none;
+}
+/* 微弱光圈：悬停时提升 */
+.bt-top-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.bt-top:hover .bt-top-ring,
+.bt-top:focus-visible .bt-top-ring {
+  opacity: 0.5;
+}
