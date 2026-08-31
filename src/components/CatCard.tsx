@@ -1,13 +1,13 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent, KeyboardEvent as RKeyboardEvent } from 'react'
 import gsap from 'gsap'
-import { catPhrases, profile, toolbox } from '@/data/github'
+import { catPhrases, profile } from '@/data/github'
 import { useTheme } from '@/hooks/useTheme'
+import CatFace from '@/components/CatFace'
+import { useCatMicro } from '@/hooks/useCatMicro'
 
 /** 气泡轮播消息：真实状态优先，猫语穿插 */
 const messages = [profile.nowStatus, ...catPhrases]
-/** 背面技术栈图标环（取 toolbox 前 6 项） */
-const techStack = toolbox.slice(0, 6).map((t) => t.emoji)
 
 // 真 3D 侧壁：用 N 段薄片绕圆周拼成亚克力筒（半径=徽章半径，高度=厚度）
 const EDGES = 72 // 段数越多轮廓越圆（弦长 2πR/N ≈ 14.8px）
@@ -69,7 +69,9 @@ const reducedMotion = () =>
  * - 圆形亚克力水晶牌 3D 徽章：真 3D 侧壁 40px 厚 + 周向打光 + 前后倒角 + 接触投影
  * - 正面头像嵌入亚克力，背面为 slogan + 技术栈图标环
  * - 自由 X+Y 翻转：按住拖拽跟手旋转（可连续 360° 多圈），松手带惯性 elastic 归位正面
- * - 悬停微浮 + 头像"眼神跟随" + 光环呼吸（桌面端；触屏/减弱动效自动关闭）
+ * - 悬停微浮 + 光环呼吸（桌面端；触屏/减弱动效自动关闭）
+ * - 矢量猫脸微表情（useCatMicro）：随机眨眼、瞳孔全窗口跟随、耳朵抖动、头部微倾；
+ *   拖拽/翻转期间全部冻结，深色主题切换为眯眼瞌睡
  * - 云朵泡泡（想法）移到徽章右上外切，轮播真实状态 + 猫语
  * - 探索装饰藏在徽章下一层，透过边缘玻璃隐约透色
  * - 昼夜联动：切深色猫咪打瞌睡冒 Zzz，切浅色秒醒抖毛撒星星
@@ -82,7 +84,6 @@ export default function CatCard() {
   const stageRef = useRef<HTMLDivElement>(null)
   const badgeRef = useRef<HTMLDivElement>(null)
   const badgeAvaRef = useRef<HTMLDivElement>(null)
-  const avaInnerRef = useRef<HTMLDivElement>(null)
   const bubbleRef = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLDivElement>(null)
   const msgIndex = useRef(0)
@@ -92,6 +93,8 @@ export default function CatCard() {
   const rot = useRef({ x: 0, y: 0 })
   const last = useRef({ x: 0, y: 0 })
   const vel = useRef({ x: 0, y: 0 })
+  /** 拖拽/翻转中：ref 供事件同步，state 用于驱动微表情 hook 暂停 */
+  const [microPaused, setMicroPaused] = useState(false)
   const floatRef = useRef<gsap.core.Tween | null>(null)
   const rafRef = useRef(0)
   /** 徽章是否处于运动中（悬停微浮 / 翻转） */
@@ -103,6 +106,9 @@ export default function CatCard() {
       moving.current.hover || moving.current.flip,
     )
   }
+
+  // ── 猫脸微表情：眨眼 / 视线跟随 / 耳朵抖动 / 头部微倾 ──
+  useCatMicro(badgeAvaRef, { paused: microPaused, drowsy: theme === 'dark' })
 
   // ── 云朵泡泡轮播 ──
   useEffect(() => {
@@ -162,9 +168,8 @@ export default function CatCard() {
   useEffect(() => {
     const stage = stageRef.current
     const badge = badgeRef.current
-    const inner = avaInnerRef.current
     const ring = ringRef.current
-    if (!stage || !badge || !inner || !ring) return
+    if (!stage || !badge || !ring) return
     if (reducedMotion() || window.matchMedia('(hover: none)').matches) return
 
     const ctx = gsap.context(() => {
@@ -197,8 +202,7 @@ export default function CatCard() {
           },
         })
       }
-      const ix = gsap.quickTo(inner, 'x', { duration: 0.5, ease: 'power2.out' })
-      const iy = gsap.quickTo(inner, 'y', { duration: 0.5, ease: 'power2.out' })
+      // 注：整张头像的位移跟随已移除——瞳孔现在会真的动，再加整图平移会变成"双重移动"
       const ro = gsap.quickTo(ring, 'opacity', { duration: 0.4 })
       const decos = gsap.utils.toArray<HTMLElement>('[data-depth]', stage)
       const decoTo = decos.map((d) => ({
@@ -212,8 +216,6 @@ export default function CatCard() {
         const rect = badge.getBoundingClientRect()
         const px = (e.clientX - rect.left) / rect.width - 0.5
         const py = (e.clientY - rect.top) / rect.height - 0.5
-        ix(px * 12)
-        iy(py * 9)
         ro(0.5 + Math.abs(px) * 0.5)
         decoTo.forEach(({ depth, x, y }) => {
           x(px * depth * 26)
@@ -221,8 +223,6 @@ export default function CatCard() {
         })
       }
       const onLeave = () => {
-        ix(0)
-        iy(0)
         ro(0.3)
         decoTo.forEach(({ x, y }) => {
           x(0)
@@ -250,6 +250,7 @@ export default function CatCard() {
     flipped.current = false
     moving.current.flip = true
     syncMoving()
+    setMicroPaused(true) // 拖拽期间冻结眨眼/视线，避免与 3D 旋转打架
     badgeRef.current?.setPointerCapture?.(e.pointerId)
     last.current = { x: e.clientX, y: e.clientY }
     gsap.killTweensOf(badgeRef.current!)
@@ -286,6 +287,7 @@ export default function CatCard() {
       rot.current = { x: 0, y: 0 }
       moving.current.flip = false
       syncMoving()
+      setMicroPaused(false)
       return
     }
     // 惯性：把松手前角速度折算成额外旋转余量
@@ -300,6 +302,7 @@ export default function CatCard() {
       onComplete: () => {
         moving.current.flip = false
         syncMoving()
+        setMicroPaused(false) // 归位动画结束后再恢复微表情
       },
     })
     rot.current = { x: 0, y: 0 }
@@ -312,6 +315,7 @@ export default function CatCard() {
     flipped.current = !flipped.current
     moving.current.flip = true
     syncMoving()
+    setMicroPaused(true) // 停在背面时脸朝外看不见，正面回正后再恢复
     gsap.killTweensOf(badgeRef.current!)
     gsap.to(badgeRef.current, {
       rotationY: flipped.current ? 180 : 0,
@@ -320,6 +324,7 @@ export default function CatCard() {
       onComplete: () => {
         moving.current.flip = false
         syncMoving()
+        if (!flipped.current) setMicroPaused(false)
       },
     })
     rot.current = { x: 0, y: flipped.current ? 180 : 0 }
@@ -469,18 +474,7 @@ export default function CatCard() {
         {/* 正面：头像 */}
         <div className="badge-face badge-front">
           <div ref={badgeAvaRef} className="badge-ava">
-            <div ref={avaInnerRef} className="badge-ava-inner">
-              <span className="absolute inset-0 flex items-center justify-center bg-[var(--bg)] text-6xl">
-                🐱
-              </span>
-              <img
-                draggable={false}
-                className="badge-ava-img absolute inset-0 h-full w-full object-cover"
-                src={profile.avatarUrl}
-                alt="YAHU 的猫头像"
-                onError={(e) => e.currentTarget.remove()}
-              />
-            </div>
+            <CatFace theme={theme} />
             {/* 打瞌睡 Zzz */}
             <span className="zzz-letter right-3 top-1 text-lg">z</span>
             <span className="zzz-letter right-7 top-2 text-xl">Z</span>
@@ -488,22 +482,14 @@ export default function CatCard() {
           </div>
         </div>
 
-        {/* 背面：slogan + 技术栈图标环 */}
+        {/* 背面：原图头像（替换原文字 + 工具说明） */}
         <div className="badge-face badge-back">
-          <div className="badge-slogan">{profile.tagline}</div>
-          <div className="badge-tech" aria-hidden>
-            {techStack.map((ch, i) => (
-              <span
-                key={i}
-                className="badge-tech-item"
-                style={{
-                  transform: `rotate(${(i * 360) / techStack.length}deg) translateY(-112px) rotate(${-(i * 360) / techStack.length}deg)`,
-                }}
-              >
-                {ch}
-              </span>
-            ))}
-          </div>
+          <img
+            className="badge-back-ava"
+            src={profile.avatarUrl}
+            alt="YAHU 的头像"
+            draggable={false}
+          />
         </div>
       </div>
     </div>

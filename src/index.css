@@ -480,36 +480,25 @@
   /* 头像嵌入亚克力：内凹阴影，避免看起来是贴上去的贴纸 */
   box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.24);
 }
-.badge-ava-inner {
+/* 矢量猫脸：铺满圆形头像碗；不要加 will-change，微表情由 GSAP 直接驱动 SVG 变换 */
+.cat-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.badge-back-ava {
   position: absolute;
-  inset: 0;
+  inset: 26px;
+  width: auto;
+  height: auto;
   border-radius: 50%;
-  will-change: transform;
-}
-.badge-slogan {
-  max-width: 232px;
-  font-weight: 800;
-  font-size: 1.05rem;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-  color: var(--foreground);
-}
-.badge-tech {
-  position: absolute;
-  inset: 0;
+  object-fit: cover;
+  background: var(--bg);
   pointer-events: none;
-}
-.badge-tech-item {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 34px;
-  height: 34px;
-  margin: -17px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* 运动期间（悬停微浮 / 翻转）关闭正反面背景模糊：
@@ -556,8 +545,11 @@
   opacity: 0.55;
   will-change: transform;
 }
-/* 头像图片：禁止原生拖拽，避免抢走翻转手势 */
-.badge-ava-img {
+/* 猫脸内的可动部件：禁止原生拖拽/选中，避免抢走翻转手势 */
+.cat-svg [data-head],
+.cat-svg [data-pupil],
+.cat-svg [data-lid],
+.cat-svg [data-ear] {
   pointer-events: none;
   -webkit-user-drag: none;
   user-select: none;
