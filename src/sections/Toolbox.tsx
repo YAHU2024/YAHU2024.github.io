@@ -1,4 +1,5 @@
 import { toolbox } from '@/data/github'
+import { copy } from '@/data/copy'
 import Reveal from '@/components/Reveal'
 import GlassCard from '@/components/GlassCard'
 
@@ -9,9 +10,10 @@ export default function Toolbox() {
         <Reveal>
           <div className="mb-9 text-center">
             <h2 className="text-3xl font-black">
-              <span className="mr-3 text-base font-bold text-accent">03</span>工具箱
+              <span className="mr-3 text-base font-bold text-accent">{copy.toolbox.num}</span>
+              {copy.toolbox.title}
             </h2>
-            <p className="mt-2 text-sm text-muted">常用的一些家伙事儿</p>
+            <p className="mt-2 text-sm text-muted">{copy.toolbox.subtitle}</p>
           </div>
         </Reveal>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

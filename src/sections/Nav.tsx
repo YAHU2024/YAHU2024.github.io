@@ -1,5 +1,6 @@
 import { Github } from 'lucide-react'
 import { profile } from '@/data/github'
+import { copy } from '@/data/copy'
 import ThemeToggle from '@/components/ThemeToggle'
 
 export default function Nav() {
@@ -10,17 +11,18 @@ export default function Nav() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <a href="#top" className="text-xl font-extrabold tracking-wide">
-          YAHU<span className="text-accent">.</span>
+          {copy.nav.brand}
+          <span className="text-accent">{copy.nav.brandDot}</span>
         </a>
         <nav className="flex items-center gap-6 text-[0.95rem] font-semibold text-muted">
           <a href="#featured" className="nav-link hidden sm:block">
-            项目
+            {copy.nav.projects}
           </a>
           <a href="#toolbox" className="nav-link hidden sm:block">
-            工具箱
+            {copy.nav.toolbox}
           </a>
           <a href="#about" className="nav-link hidden sm:block">
-            关于
+            {copy.nav.about}
           </a>
           <ThemeToggle />
           <a
@@ -30,7 +32,7 @@ export default function Nav() {
             className="btn-pop flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-bold text-[var(--accent-ink)]"
           >
             <Github className="h-4 w-4" />
-            GitHub
+            {copy.nav.github}
           </a>
         </nav>
       </div>

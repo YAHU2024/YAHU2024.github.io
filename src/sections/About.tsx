@@ -1,3 +1,4 @@
+import { copy } from '@/data/copy'
 import Reveal from '@/components/Reveal'
 
 export default function About() {
@@ -6,22 +7,31 @@ export default function About() {
       <div className="mx-auto max-w-3xl">
         <Reveal>
           <h2 className="text-center text-3xl font-black">
-            <span className="mr-3 text-base font-bold text-accent">04</span>关于我
+            <span className="mr-3 text-base font-bold text-accent">{copy.about.num}</span>
+            {copy.about.title}
           </h2>
         </Reveal>
         <Reveal delay={100}>
           <div className="mt-8 space-y-4 text-center text-lg leading-relaxed text-muted">
-            <p>
-              我是 <b className="font-extrabold text-foreground">YAHU</b>
-              ，喜欢把日常里的小麻烦做成
-              <b className="font-extrabold text-accent">顺手的软件</b>
-              。信奉 vibe coding：先让它跑起来，再把它打磨好。
-            </p>
-            <p>
-              比起"大而全"，我更享受把一个小工具做到顺手的过程。最近主要在折腾
-              <b className="font-extrabold text-foreground"> AI 桌面应用</b>和
-              <b className="font-extrabold text-foreground">知识流水线</b>。
-            </p>
+            {copy.about.paragraphs.map((p, i) => (
+              <p key={i}>
+                {p.segments.map((seg, j) => {
+                  if ('strong' in seg)
+                    return (
+                      <b key={j} className="font-extrabold text-foreground">
+                        {seg.text}
+                      </b>
+                    )
+                  if ('accent' in seg)
+                    return (
+                      <b key={j} className="font-extrabold text-accent">
+                        {seg.text}
+                      </b>
+                    )
+                  return <span key={j}>{seg.text}</span>
+                })}
+              </p>
+            ))}
           </div>
         </Reveal>
       </div>

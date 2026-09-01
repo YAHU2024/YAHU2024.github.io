@@ -23,8 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 
-#agent
+# agent
 .workbuddy
+
 # design drafts & experiments (kept locally, not part of the site)
 mockups/
 proposals/
+
+# internal docs
+/docs

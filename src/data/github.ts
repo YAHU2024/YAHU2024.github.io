@@ -28,12 +28,12 @@ export const profile = {
   createdAt: '2024-10-20',
   // ↓ 可编辑的展示文案
   headline: {
-    line1: '把日常的小麻烦，',
+    line1: '把日常中的需求，',
     line2Pre: '做成',
     accent: '顺手的软件',
     line2Post: '。',
   },
-  tagline: '构建 AI 时代的个人工具 · vibe coding 实践者',
+  tagline: '开发 AI 时代的个人工具 · vibe coding 实践者',
   subtitle: '喜欢把一个想法从"跑起来"打磨到"用得爽"。',
   /** 猫气泡里的真实状态（会和 catPhrases 轮播） */
   nowStatus: '在打磨 Unarchive 的字幕抓取，顺便给工具们补说明书',
@@ -42,11 +42,11 @@ export const profile = {
 /** 猫咪气泡的俏皮语录（与 nowStatus 轮播） */
 export const catPhrases = [
   '呼噜呼噜…',
-  'vibe 一下？',
-  '在写 bug，别吵',
-  '今天也要顺手的软件',
+  'vibe 中…',
+  '在coding，别吵',
+  '在测试，别打扰！',
   '喵？有 commit',
-  '摸鱼是生产力',
+  'API 呢？',
 ]
 
 export interface FeaturedRepo {
@@ -91,7 +91,7 @@ export const featured: FeaturedRepo[] = [
     badge: '⚡ 持续更新',
     lang: 'Shell',
     langColor: '#89e051',
-    desc: '我在用的 Claude 技能合集：日常 vibe coding 的提效小工具箱。',
+    desc: '我自制的 Claude 技能合集：日常 vibe coding 的提效小工具箱。',
     tags: ['Agent', 'Skills'],
     url: 'https://github.com/YAHU2024/claude-skills',
   },

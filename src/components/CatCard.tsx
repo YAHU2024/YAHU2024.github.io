@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent, KeyboardEvent as RKeyboardEvent } from 'react'
 import gsap from 'gsap'
 import { catPhrases, profile } from '@/data/github'
+import { copy } from '@/data/copy'
 import { useTheme } from '@/hooks/useTheme'
 import CatFace from '@/components/CatFace'
 import { useCatMicro } from '@/hooks/useCatMicro'
@@ -437,7 +438,7 @@ export default function CatCard() {
         onPointerCancel={endFlip}
         tabIndex={0}
         role="button"
-        aria-label="猫徽章，按住拖拽可 360° 翻转，松手自动归位"
+        aria-label={copy.cat.badgeAria}
         onKeyDown={onKeyDown}
       >
         {/* 真 3D 侧壁：72 段拼成亚克力筒，按角度周向打光（光源左上 135°）
@@ -487,7 +488,7 @@ export default function CatCard() {
           <img
             className="badge-back-ava"
             src={profile.avatarUrl}
-            alt="YAHU 的头像"
+            alt={copy.cat.avatarAlt}
             draggable={false}
           />
         </div>

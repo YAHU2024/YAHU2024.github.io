@@ -1,5 +1,6 @@
 import { Globe } from 'lucide-react'
 import { hiddenRepos, type Repo } from '@/data/github'
+import { copy } from '@/data/copy'
 import Reveal from '@/components/Reveal'
 
 /** 排序：有更新时间的在前，新的优先；空描述给一句占位 */
@@ -15,7 +16,8 @@ export default function AllRepos({ repos }: { repos: Repo[] }) {
         <Reveal>
           <div className="mb-9 flex items-baseline justify-between gap-4">
             <h2 className="text-3xl font-black">
-              <span className="mr-3 text-base font-bold text-accent">02</span>全部作品
+              <span className="mr-3 text-base font-bold text-accent">{copy.allRepos.num}</span>
+              {copy.allRepos.title}
             </h2>
             <a
               href="https://github.com/YAHU2024?tab=repositories"
@@ -23,7 +25,7 @@ export default function AllRepos({ repos }: { repos: Repo[] }) {
               rel="noreferrer"
               className="text-sm font-bold text-muted transition-colors hover:text-foreground"
             >
-              更多 <span className="ar-pop">→</span>
+              {copy.allRepos.more} <span className="ar-pop">→</span>
             </a>
           </div>
         </Reveal>
@@ -44,8 +46,8 @@ export default function AllRepos({ repos }: { repos: Repo[] }) {
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="min-w-28 font-bold">{r.name}</span>
-                  <span className="flex-1 text-sm text-muted">{r.description ?? '（还没有写描述）'}</span>
-                  <span className="text-xs font-semibold text-muted">{r.language ?? '—'}</span>
+                  <span className="flex-1 text-sm text-muted">{r.description ?? copy.allRepos.noDescription}</span>
+                  <span className="text-xs font-semibold text-muted">{r.language ?? copy.allRepos.dash}</span>
                   <span className="repo-go text-sm font-extrabold" aria-hidden>
                     →
                   </span>
@@ -56,8 +58,8 @@ export default function AllRepos({ repos }: { repos: Repo[] }) {
                     target="_blank"
                     rel="noreferrer"
                     className="repo-live shrink-0"
-                    aria-label={`打开 ${r.name} 的项目官网`}
-                    title="项目官网"
+                    aria-label={copy.allRepos.homepageAria(r.name)}
+                    title={copy.allRepos.homepageTitle}
                   >
                     <Globe className="h-3.5 w-3.5" />
                   </a>

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ArrowDown, Github } from 'lucide-react'
 import { profile, snapshot } from '@/data/github'
+import { copy } from '@/data/copy'
 import CatCard from '@/components/CatCard'
 import CountUp from '@/components/CountUp'
 import Reveal from '@/components/Reveal'
@@ -23,12 +24,13 @@ function latestUpdatedDays(repos: { updatedAt: string | null }[]): number | null
 
 /** 人性化的相对时间：0→今天、1→昨天、一周内→N 天前、一月内→N 周前、更久→N 个月前 */
 function formatLatestUpdated(days: number | null): string {
-  if (days === null) return '—'
-  if (days === 0) return '今天'
-  if (days === 1) return '昨天'
-  if (days < 7) return `${days} 天前`
-  if (days < 30) return `${Math.floor(days / 7)} 周前`
-  return `${Math.floor(days / 30)} 个月前`
+  const { timeAgo } = copy.hero
+  if (days === null) return timeAgo.none
+  if (days === 0) return timeAgo.today
+  if (days === 1) return timeAgo.yesterday
+  if (days < 7) return timeAgo.days(days)
+  if (days < 30) return timeAgo.weeks(Math.floor(days / 7))
+  return timeAgo.months(Math.floor(days / 30))
 }
 
 export default function Hero({ publicRepos, repos }: HeroProps) {
@@ -62,7 +64,7 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
         <div>
           <Reveal>
             <span className="glass inline-block rounded-full px-4 py-1.5 text-sm font-bold">
-              👋 你好，我是 YAHU
+              {copy.hero.hello}
             </span>
           </Reveal>
           <h1 className="mt-6 text-[2.3rem] font-black leading-[1.25] tracking-wide md:text-5xl">
@@ -88,18 +90,18 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
             <div className="mt-8 flex flex-wrap items-center">
               <div className="py-1 pr-7">
                 <CountUp value={publicRepos} className="text-2xl font-extrabold" />
-                <div className="mt-0.5 text-xs font-semibold text-muted">公开仓库</div>
+                <div className="mt-0.5 text-xs font-semibold text-muted">{copy.hero.statRepos}</div>
               </div>
               <div className="border-l py-1 pl-7 pr-7" style={{ borderColor: 'var(--line)' }}>
                 <CountUp
                   value={snapshot.contributionsLastYear}
                   className="text-2xl font-extrabold"
                 />
-                <div className="mt-0.5 text-xs font-semibold text-muted">年度提交</div>
+                <div className="mt-0.5 text-xs font-semibold text-muted">{copy.hero.statCommits}</div>
               </div>
               <div className="border-l py-1 pl-7" style={{ borderColor: 'var(--line)' }}>
                 <div className="text-2xl font-extrabold">{formatLatestUpdated(days)}</div>
-                <div className="mt-0.5 text-xs font-semibold text-muted">最近更新</div>
+                <div className="mt-0.5 text-xs font-semibold text-muted">{copy.hero.statUpdated}</div>
               </div>
             </div>
           </Reveal>
@@ -110,7 +112,7 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
                 className="btn-pop rounded-xl bg-accent px-6 py-3 font-bold text-[var(--accent-ink)]"
                 style={{ boxShadow: '0 12px 30px rgba(0,0,0,0.18)' }}
               >
-                看看我的项目 <ArrowDown className="ml-1 inline h-4 w-4" />
+                {copy.hero.ctaProjects} <ArrowDown className="ml-1 inline h-4 w-4" />
               </a>
               <a
                 href={profile.htmlUrl}
@@ -118,7 +120,7 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
                 rel="noreferrer"
                 className="btn-pop glass flex items-center gap-2 rounded-xl px-6 py-3 font-bold"
               >
-                <Github className="h-4 w-4" /> GitHub
+                <Github className="h-4 w-4" /> {copy.hero.github}
               </a>
             </div>
           </Reveal>
