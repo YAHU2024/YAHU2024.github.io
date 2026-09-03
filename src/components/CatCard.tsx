@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent, KeyboardEvent as RKeyboardEvent } from 'react'
 import gsap from 'gsap'
-import { catPhrases, profile } from '@/data/github'
+import { profile } from '@/data/github'
 import { copy } from '@/data/copy'
 import { useTheme } from '@/hooks/useTheme'
 import CatFace from '@/components/CatFace'
 import { useCatMicro } from '@/hooks/useCatMicro'
-
-/** 气泡轮播消息：真实状态优先，猫语穿插 */
-const messages = [profile.nowStatus, ...catPhrases]
 
 // 真 3D 侧壁：用 N 段薄片绕圆周拼成亚克力筒（半径=徽章半径，高度=厚度）
 const EDGES = 72 // 段数越多轮廓越圆（弦长 2πR/N ≈ 14.8px）
@@ -73,7 +70,6 @@ const reducedMotion = () =>
  * - 悬停微浮 + 光环呼吸（桌面端；触屏/减弱动效自动关闭）
  * - 矢量猫脸微表情（useCatMicro）：随机眨眼、瞳孔全窗口跟随、耳朵抖动、头部微倾；
  *   拖拽/翻转期间全部冻结，深色主题切换为眯眼瞌睡
- * - 云朵泡泡（想法）移到徽章右上外切，轮播真实状态 + 猫语
  * - 探索装饰藏在徽章下一层，透过边缘玻璃隐约透色
  * - 昼夜联动：切深色猫咪打瞌睡冒 Zzz，切浅色秒醒抖毛撒星星
  * - 键盘：聚焦后 Enter/Space 翻到背面停留，再按回正面
@@ -85,10 +81,7 @@ export default function CatCard() {
   const stageRef = useRef<HTMLDivElement>(null)
   const badgeRef = useRef<HTMLDivElement>(null)
   const badgeAvaRef = useRef<HTMLDivElement>(null)
-  const bubbleRef = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLDivElement>(null)
-  const msgIndex = useRef(0)
-  const animating = useRef(false)
   const flipping = useRef(false)
   const flipped = useRef(false)
   const rot = useRef({ x: 0, y: 0 })
@@ -110,60 +103,6 @@ export default function CatCard() {
 
   // ── 猫脸微表情：眨眼 / 视线跟随 / 耳朵抖动 / 头部微倾 ──
   useCatMicro(badgeAvaRef, { paused: microPaused, drowsy: theme === 'dark' })
-
-  // ── 云朵泡泡轮播 ──
-  useEffect(() => {
-    const bubble = bubbleRef.current
-    if (!bubble) return
-    const reduced = reducedMotion()
-
-    const show = (text: string) => {
-      bubble.textContent = text
-      if (reduced) {
-        gsap.set(bubble, { opacity: 1, y: 0, scale: 1 })
-        return
-      }
-      gsap.fromTo(
-        bubble,
-        { opacity: 0, y: 8, scale: 0.7 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(2)' },
-      )
-    }
-    const rotate = () => {
-      if (animating.current) return
-      animating.current = true
-      msgIndex.current = (msgIndex.current + 1) % messages.length
-      const swap = () => show(messages[msgIndex.current])
-      if (reduced) {
-        swap()
-      } else {
-        gsap.to(bubble, {
-          opacity: 0,
-          y: 6,
-          scale: 0.8,
-          duration: 0.25,
-          ease: 'power1.in',
-          onComplete: swap,
-        })
-      }
-      animating.current = false
-    }
-
-    const first = window.setTimeout(() => show(messages[0]), 1300)
-    const timer = window.setInterval(rotate, 7000)
-    const stage = stageRef.current
-    const onEnter = () => {
-      if (!bubble.style.opacity || bubble.style.opacity === '0')
-        show(messages[msgIndex.current])
-    }
-    stage?.addEventListener('mouseenter', onEnter)
-
-    return () => {
-      window.clearTimeout(first)
-      window.clearInterval(timer)
-      stage?.removeEventListener('mouseenter', onEnter)
-    }
-  }, [])
 
   // ── 悬停微浮 + 眼神跟随 + 光环呼吸（触屏/减弱动效关闭） ──
   useEffect(() => {
@@ -422,11 +361,6 @@ export default function CatCard() {
           {d.ch}
         </span>
       ))}
-
-      {/* 云朵泡泡（想法，徽章右上外切，尾指向圆） */}
-      <div ref={bubbleRef} className="cloud-bubble glass" style={{ opacity: 0 }}>
-        {messages[0]}
-      </div>
 
       {/* 3D 徽章 */}
       <div

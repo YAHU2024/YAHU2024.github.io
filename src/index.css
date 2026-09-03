@@ -541,24 +541,6 @@
   -webkit-user-select: none;
 }
 
-/* 云朵泡泡（想法，徽章右上外切，左缘在徽章右缘之外 → 零重叠，尾指向徽章） */
-.cloud-bubble {
-  position: absolute;
-  top: 8px;
-  left: 366px;
-  z-index: 20;
-  width: 176px;
-  max-width: 176px;
-  padding: 14px 18px 14px 16px;
-  border-radius: 22px 22px 22px 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--foreground);
-  text-align: left;
-  transform-origin: bottom left;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -588,7 +570,7 @@
   position: fixed;
   right: 24px;
   bottom: 24px;
-  /* 置顶：高于正文层(.layer-content z1)与云朵泡泡(z20)，避免被遮挡 */
+  /* 置顶：高于正文层(.layer-content z1)与其他悬浮层，避免被遮挡 */
   z-index: 50;
   width: 56px;
   height: 56px;

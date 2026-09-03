@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────
 // 站点内容与数据层
-// 1. profile / featured / toolbox / catPhrases：人工维护的文案，想改就改
+// 1. profile / featured / toolbox：人工维护的文案，想改就改
 // 2. snapshot.json：GitHub 数据离线快照，由 scripts/fetch-github.mjs 在
 //    构建时自动更新（本地也可手动 node scripts/fetch-github.mjs 运行）
 // 3. 运行时 useGitHub 仍会调用 GitHub API 实时刷新，快照只作兜底
@@ -35,19 +35,7 @@ export const profile = {
   },
   tagline: '开发 AI 时代的个人工具 · vibe coding 实践者',
   subtitle: '喜欢把一个想法从"跑起来"打磨到"用得爽"。',
-  /** 猫气泡里的真实状态（会和 catPhrases 轮播） */
-  nowStatus: '在打磨 Unarchive 的字幕抓取，顺便给工具们补说明书',
 }
-
-/** 猫咪气泡的俏皮语录（与 nowStatus 轮播） */
-export const catPhrases = [
-  '呼噜呼噜…',
-  'vibe 中…',
-  '在coding，别吵',
-  '在测试，别打扰！',
-  '喵？有 commit',
-  'API 呢？',
-]
 
 export interface FeaturedRepo {
   name: string

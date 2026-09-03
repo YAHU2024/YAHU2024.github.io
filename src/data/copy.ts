@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────
 // 界面文案集中配置（唯一修改入口）
 // 改字只改这个文件；组件一律引用 copy，不允许出现裸字符串文案。
-// 说明：内容层数据（profile / featured / toolbox / catPhrases）
+// 说明：内容层数据（profile / featured / toolbox）
 // 仍在 src/data/github.ts，本文件只管界面 UI 文案。
 // ─────────────────────────────────────────────────────────────
 
@@ -61,7 +61,7 @@ export const copy = {
           { text: 'YAHU', strong: true },
           { text: '，喜欢把日常中的需求做成' },
           { text: '顺手的软件', accent: true },
-          { text: '。热爱 vibe coding：先让它跑起来，再把它打磨好。' },
+          { text: '。热爱 vibe coding，习惯先让它跑起来，再把它打磨好。' },
         ],
       },
       {
