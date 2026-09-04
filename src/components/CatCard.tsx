@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent, KeyboardEvent as RKeyboardEvent } from 'react'
 import gsap from 'gsap'
 import { profile } from '@/data/github'
@@ -10,10 +10,12 @@ import { useCatMicro } from '@/hooks/useCatMicro'
 // 真 3D 侧壁：用 N 段薄片绕圆周拼成亚克力筒（半径=徽章半径，高度=厚度）
 const EDGES = 72 // 段数越多轮廓越圆（弦长 2πR/N ≈ 14.8px）
 const EDGE_STEP = 360 / EDGES
-const EDGE_R = 170 // 徽章半径（340/2）
-const EDGE_W = 17 // 单段切向宽（> 弦长，保证接缝重叠无漏缝）
-const EDGE_T = 28 // 侧壁厚度（直径:厚度 ≈ 12:1，薄玻璃水晶牌）
-const EDGE_H = EDGE_T + 1 // 侧壁高度（+1 避免与正反面共面 z-fighting）
+// 以下均为「基准直径 340px」下的取值。窄屏时 .badge 会收缩到容器宽度，
+// 侧壁/装饰按实际直径等比换算（scale = 实测直径 / BASE_D），否则侧壁会飞出圆外。
+const BASE_D = 340
+const BASE_EDGE_R = 170 // 徽章半径（340/2）
+const BASE_EDGE_W = 17 // 单段切向宽（> 弦长，保证接缝重叠无漏缝）
+const BASE_EDGE_T = 28 // 侧壁厚度（直径:厚度 ≈ 12:1，薄玻璃水晶牌）
 
 // 亚克力水晶牌色板：周向打光后在 JS 内算色并内联注入
 // 注意：不能用 filter: brightness()，filter 会强制 flatten 掉 preserve-3d 的 3D 定位
@@ -89,6 +91,8 @@ export default function CatCard() {
   const vel = useRef({ x: 0, y: 0 })
   /** 拖拽/翻转中：ref 供事件同步，state 用于驱动微表情 hook 暂停 */
   const [microPaused, setMicroPaused] = useState(false)
+  /** 徽章直径相对基准（340px）的缩放比：窄屏收缩时侧壁与装饰等比跟随 */
+  const [scale, setScale] = useState(1)
   const floatRef = useRef<gsap.core.Tween | null>(null)
   const rafRef = useRef(0)
   /** 徽章是否处于运动中（悬停微浮 / 翻转） */
@@ -103,6 +107,23 @@ export default function CatCard() {
 
   // ── 猫脸微表情：眨眼 / 视线跟随 / 耳朵抖动 / 头部微倾 ──
   useCatMicro(badgeAvaRef, { paused: microPaused, drowsy: theme === 'dark' })
+
+  // ── 跟踪徽章实际直径 ──
+  // 用 useLayoutEffect 而非 useEffect：在浏览器绘制前就完成测量，
+  // 否则窄屏首帧会按基准 340px 摆放侧壁，出现一帧"侧壁飞出圆外"。
+  useLayoutEffect(() => {
+    const el = badgeRef.current
+    if (!el) return
+    const apply = (w: number) => {
+      if (w > 0) setScale(w / BASE_D)
+    }
+    apply(el.getBoundingClientRect().width)
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) apply(e.contentRect.width)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   // ── 悬停微浮 + 眼神跟随 + 光环呼吸（触屏/减弱动效关闭） ──
   useEffect(() => {
@@ -345,6 +366,11 @@ export default function CatCard() {
     })
   }, [theme])
 
+  // 侧壁与装饰：按实测直径等比换算（scale 见上方 ResizeObserver）
+  const edgeR = BASE_EDGE_R * scale
+  const edgeW = BASE_EDGE_W * scale
+  const edgeH = BASE_EDGE_T * scale + 1 // +1 避免与正反面共面 z-fighting
+
   return (
     <div ref={stageRef} className="cat-stage relative mx-auto w-full max-w-sm select-none">
       {/* 接触投影：撑起重量感（z-index 0，位于徽章之下） */}
@@ -356,7 +382,11 @@ export default function CatCard() {
           key={i}
           className="badge-hidden-deco"
           data-depth={d.depth}
-          style={{ left: `calc(50% + ${d.x}px)`, top: `calc(50% + ${d.y}px)`, fontSize: '1.4rem' }}
+          style={{
+            left: `calc(50% + ${d.x * scale}px)`,
+            top: `calc(50% + ${d.y * scale}px)`,
+            fontSize: `calc(1.4rem * ${scale})`,
+          }}
         >
           {d.ch}
         </span>
@@ -393,11 +423,11 @@ export default function CatCard() {
               key={i}
               className="badge-edge"
               style={{
-                width: `${EDGE_W}px`,
-                height: `${EDGE_H}px`,
-                marginLeft: `${-EDGE_W / 2}px`,
-                marginTop: `${-EDGE_H / 2}px`,
-                transform: `rotateZ(${i * EDGE_STEP}deg) translateY(${EDGE_R}px) rotateX(90deg)`,
+                width: `${edgeW}px`,
+                height: `${edgeH}px`,
+                marginLeft: `${-edgeW / 2}px`,
+                marginTop: `${-edgeH / 2}px`,
+                transform: `rotateZ(${i * EDGE_STEP}deg) translateY(${edgeR}px) rotateX(90deg)`,
                 background: bg,
               }}
             />

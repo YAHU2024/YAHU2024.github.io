@@ -3,8 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="YAHU 的个人网站 — 把日常的小麻烦做成顺手的软件" />
     <title>YAHU · 把日常做成顺手的软件</title>
+    <meta name="description" content="YAHU 的个人网站 — 把日常的小麻烦做成顺手的软件" />
+    <link rel="canonical" href="https://yahu2024.github.io/" />
+
+    <!-- 浏览器 UI 着色：跟随站点明暗两套底色 -->
+    <meta name="theme-color" content="#0a0e1a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fbf9f4" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- 首屏字体提前发起请求：CSS 里的 @font-face 要等 CSS 到手才发现字体，晚一个 RTT -->
+    <link
+      rel="preload"
+      href="/fonts/archivo-latin-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- 分享卡片（微信 / X / 钉钉 / Slack 等读取 og、twitter 标签） -->
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="YAHU" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:url" content="https://yahu2024.github.io/" />
+    <meta property="og:title" content="YAHU · 把日常做成顺手的软件" />
+    <meta property="og:description" content="YAHU 的个人网站 — 把日常的小麻烦做成顺手的软件" />
+    <meta property="og:image" content="https://yahu2024.github.io/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="YAHU · 把日常做成顺手的软件" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="YAHU · 把日常做成顺手的软件" />
+    <meta name="twitter:description" content="YAHU 的个人网站 — 把日常的小麻烦做成顺手的软件" />
+    <meta name="twitter:image" content="https://yahu2024.github.io/og-image.png" />
     <script>
       // 防主题闪烁：渲染前先确定明暗
       ;(function () {
@@ -22,5 +53,15 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "YAHU",
+        "url": "https://yahu2024.github.io/",
+        "description": "把日常的小麻烦做成顺手的软件",
+        "sameAs": ["https://github.com/YAHU2024"]
+      }
+    </script>
   </body>
 </html>
