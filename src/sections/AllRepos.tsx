@@ -1,4 +1,3 @@
-import { Globe } from 'lucide-react'
 import { hiddenRepos, type Repo } from '@/data/github'
 import { copy } from '@/data/copy'
 import Reveal from '@/components/Reveal'
@@ -52,18 +51,6 @@ export default function AllRepos({ repos }: { repos: Repo[] }) {
                     →
                   </span>
                 </a>
-                {r.homepage && (
-                  <a
-                    href={r.homepage}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="repo-live shrink-0"
-                    aria-label={copy.allRepos.homepageAria(r.name)}
-                    title={copy.allRepos.homepageTitle}
-                  >
-                    <Globe className="h-3.5 w-3.5" />
-                  </a>
-                )}
               </div>
             ))}
           </div>

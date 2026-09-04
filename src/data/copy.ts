@@ -42,8 +42,6 @@ export const copy = {
     title: '全部作品',
     more: '更多',
     noDescription: '（还没有写描述）',
-    homepageTitle: '项目官网',
-    homepageAria: (name: string) => `打开 ${name} 的项目官网`,
     dash: '—',
   },
   toolbox: {

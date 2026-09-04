@@ -778,27 +778,3 @@ a:hover .ar-pop {
   opacity: 1;
   transform: none;
 }
-/* 行尾项目官网图标钮：默认半透明，hover 浮现 + accent 边框 + 弹性放大 */
-.repo-live {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  border: 1px solid var(--gborder);
-  color: var(--accent);
-  opacity: 0.55;
-  transition:
-    opacity 0.25s ease,
-    border-color 0.25s ease,
-    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.repo-row:hover .repo-live {
-  opacity: 1;
-  border-color: var(--accent);
-  transform: scale(1.12);
-}
-.repo-live:active {
-  transform: scale(0.92);
-}
