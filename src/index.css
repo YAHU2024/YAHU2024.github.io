@@ -803,3 +803,36 @@ a:hover .ar-pop {
   opacity: 1;
   transform: none;
 }
+
+/* 移动下拉面板：比 .glass 更实的磨砂底。
+   .glass 的半透明叠在首屏文字上会互相干扰难读；这里用接近实底的
+   color-mix（92%）+ 强磨砂 blur，保留玻璃的圆角/描边/内高光，保证文字可读 */
+.menu-panel {
+  background: var(--glass-solid);
+  background: color-mix(in srgb, var(--glass-solid) 92%, transparent);
+  border: 1px solid var(--gborder);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    inset 0 1px 0 var(--glow-inner),
+    0 16px 36px -16px rgb(0 0 0 / 0.4);
+}
+
+/* ============================================================
+   移动端导航抽屉入场：轻滑落 + 渐显
+   （reduced-motion 由上方全局规则把动画压到 0.01ms）
+   ============================================================ */
+.menu-in {
+  animation: menu-in 0.18s ease-out;
+  transform-origin: top;
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

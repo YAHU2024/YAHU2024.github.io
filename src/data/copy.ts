@@ -13,6 +13,8 @@ export const copy = {
     toolbox: '工具箱',
     about: '关于',
     github: 'GitHub',
+    menuOpen: '打开菜单',
+    menuClose: '关闭菜单',
   },
   hero: {
     hello: '👋 你好，我是 YAHU',
