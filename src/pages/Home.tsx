@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
 import Nav from '@/sections/Nav'
 import Hero from '@/sections/Hero'
-import Featured from '@/sections/Featured'
-import AllRepos from '@/sections/AllRepos'
+import Projects from '@/sections/Projects'
 import Toolbox from '@/sections/Toolbox'
 import About from '@/sections/About'
 import Footer from '@/sections/Footer'
@@ -66,8 +65,7 @@ export default function Home() {
       <Nav />
       <main>
         <Hero publicRepos={publicRepos} repos={repos} />
-        <Featured />
-        <AllRepos repos={repos} />
+        <Projects repoCount={publicRepos} />
         <Toolbox />
         <About />
       </main>

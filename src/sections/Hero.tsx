@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ArrowDown, Github } from 'lucide-react'
 import { profile, snapshot } from '@/data/github'
+import { now } from '@/data/now'
 import { copy } from '@/data/copy'
 import CatCard from '@/components/CatCard'
 import CountUp from '@/components/CountUp'
@@ -82,8 +83,18 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
           <Reveal delay={120}>
             <p className="mt-5 text-lg text-muted">
               <b className="font-bold text-foreground">{profile.tagline}</b>
-              <br />
-              {profile.subtitle}
+            </p>
+
+            {/* NOW：最近在做什么（单行）
+                内容在 src/data/now.ts 的 recent，直接改那里即可 */}
+            <p className="mt-6 text-[0.95rem] leading-relaxed text-muted">
+              <span
+                className="mr-2 inline-flex items-center align-middle rounded-full px-2.5 py-0.5 text-xs font-extrabold text-accent"
+                style={{ background: 'var(--accent-soft)' }}
+              >
+                {copy.hero.recentLabel}
+              </span>
+              {now.recent}
             </p>
           </Reveal>
           <Reveal delay={200}>
@@ -108,7 +119,7 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
           <Reveal delay={280}>
             <div className="mt-9 flex flex-wrap gap-4">
               <a
-                href="#featured"
+                href="#projects"
                 className="btn-pop rounded-xl bg-accent px-6 py-3 font-bold text-[var(--accent-ink)]"
                 style={{ boxShadow: '0 12px 30px rgba(0,0,0,0.18)' }}
               >
@@ -126,11 +137,20 @@ export default function Hero({ publicRepos, repos }: HeroProps) {
           </Reveal>
         </div>
 
-        {/* 右：互动猫卡 */}
+        {/* 右：互动猫徽章 + 状态胶囊 + 台词气泡（NOW） */}
         <Reveal delay={150}>
-          <CatCard />
+          <CatColumn />
         </Reveal>
       </div>
     </section>
   )
+}
+
+/**
+ * 猫这一列：只有徽章本体
+ * - 沿用现有 CatCard（3D 亚克力 + 微表情 + 昼夜联动），不做改动
+ * - NOW 已移到左半屏「最近」标签下，这里不再挂任何文字
+ */
+function CatColumn() {
+  return <CatCard />
 }

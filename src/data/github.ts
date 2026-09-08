@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────────────────────
 // 站点内容与数据层
-// 1. profile / featured / toolbox：人工维护的文案，想改就改
+// 1. profile / toolbox：人工维护的文案，想改就改
+//    （项目与「最近状态」已迁出：见 projects.ts / now.ts）
 // 2. snapshot.json：GitHub 数据离线快照，由 scripts/fetch-github.mjs 在
 //    构建时自动更新（本地也可手动 node scripts/fetch-github.mjs 运行）
 // 3. 运行时 useGitHub 仍会调用 GitHub API 实时刷新，快照只作兜底
@@ -34,56 +35,9 @@ export const profile = {
     line2Post: '。',
   },
   tagline: '开发 AI 时代的个人工具 · vibe coding 实践者',
+  /** 已不在 Hero 展示：那个位置换成了「最近」标签 + src/data/now.ts 的 recent */
   subtitle: '喜欢把一个想法从"跑起来"打磨到"用得爽"。',
 }
-
-export interface FeaturedRepo {
-  name: string
-  emoji: string
-  badge: string
-  lang: string
-  langColor: string
-  desc: string
-  tags: string[]
-  url: string
-  /** 项目官网（有 GitHub Pages 的仓库手填） */
-  homepage?: string
-}
-
-/** 精选项目：文案手写，不用 GitHub 的 description */
-export const featured: FeaturedRepo[] = [
-  {
-    name: 'myTool',
-    emoji: '🤖',
-    badge: '🔧 主力项目',
-    lang: 'C#',
-    langColor: '#178600',
-    desc: 'AI 时代的学习工具：把资料喂给它，实时流式解读、追问轻对话，历史保存在本地，隐私放心。',
-    tags: ['WPF', 'OpenAI'],
-    url: 'https://github.com/YAHU2024/myTool',
-    homepage: 'https://yahu2024.github.io/myTool/',
-  },
-  {
-    name: 'Unarchive',
-    emoji: '🎞️',
-    badge: '🌱 新做的',
-    lang: 'Python',
-    langColor: '#3572A5',
-    desc: '把视频收藏夹变成个人知识库：收藏不再吃灰，自动整理成可检索的笔记。',
-    tags: ['字幕', '知识库'],
-    url: 'https://github.com/YAHU2024/Unarchive',
-  },
-  {
-    name: 'claude-skills',
-    emoji: '🧩',
-    badge: '⚡ 持续更新',
-    lang: 'Shell',
-    langColor: '#89e051',
-    desc: '我自制的 Claude 技能合集：日常 vibe coding 的提效小工具箱。',
-    tags: ['Agent', 'Skills'],
-    url: 'https://github.com/YAHU2024/claude-skills',
-  },
-]
 
 export interface ToolboxItem {
   emoji: string
@@ -102,19 +56,6 @@ export const toolbox: ToolboxItem[] = [
   { emoji: '🌐', name: '网络 · Cisco PT', use: '课程实践' },
   { emoji: '🛠️', name: 'Git & GitHub', use: '版本与发布' },
 ]
-
-/** 全部作品里隐藏的仓库（练习/脚手架类），比较时忽略大小写 */
-export const hiddenRepos = ['yahu.github.io', 'YAHU2024.github.io', 'hello-world']
-
-export const languageColors: Record<string, string> = {
-  'C#': '#178600',
-  Python: '#3572A5',
-  Vue: '#41b883',
-  Shell: '#89e051',
-  Java: '#b07219',
-  TypeScript: '#3178c6',
-  JavaScript: '#f1e05a',
-}
 
 // ── 离线快照（由 scripts/fetch-github.mjs 生成/更新） ──
 interface SnapshotUser {

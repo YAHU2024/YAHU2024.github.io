@@ -1,8 +1,10 @@
 // ─────────────────────────────────────────────────────────────
 // 界面文案集中配置（唯一修改入口）
 // 改字只改这个文件；组件一律引用 copy，不允许出现裸字符串文案。
-// 说明：内容层数据（profile / featured / toolbox）
-// 仍在 src/data/github.ts，本文件只管界面 UI 文案。
+// 说明：内容层数据分三个文件，本文件只管界面 UI 文案
+//   src/data/projects.ts —— 项目（按 doing / shipped / idea 分组）
+//   src/data/now.ts      —— 最近状态（doing / learning / timeline）
+//   src/data/github.ts   —— 个人资料、工具箱、GitHub 快照
 // ─────────────────────────────────────────────────────────────
 
 export const copy = {
@@ -31,28 +33,43 @@ export const copy = {
     },
     ctaProjects: '看看我的项目',
     github: 'GitHub',
+    /** 「最近」小标签，后跟 src/data/now.ts 的 recent 两行内容 */
+    recentLabel: '最近',
   },
-  featured: {
+  now: {
+    num: '00',
+    title: '最近状态',
+    updatedAt: (date: string) => `最后更新 ${date}`,
+    doingTitle: '正在做',
+    learningTitle: '在学 · 在读',
+    timelineTitle: '最近动态',
+    empty: '暂无',
+  },
+  projects: {
     num: '01',
-    title: '精选项目',
-    allOnGitHub: '全部在 GitHub',
-    projectHomepage: '项目官网',
-    github: 'GitHub',
-  },
-  allRepos: {
-    num: '02',
-    title: '全部作品',
-    more: '更多',
-    noDescription: '（还没有写描述）',
-    dash: '—',
+    title: '项目',
+    allOnGitHub: (n: number) => `全部 ${n} 个仓库在 GitHub`,
+    status: {
+      doing: '正在做',
+      shipped: '已上线',
+      idea: '想做',
+    },
+    progress: '进度',
+    repo: '源码',
+    site: '官网',
+    /** PC 端补位卡：每个分组右侧的占位玻璃卡文案 */
+    placeholderTitle: '占位中',
+    placeholderText: '这个位置留给同状态的下一个项目',
+    /** 状态筛选用例：无障碍文本，说明该分组有多少个项目 */
+    groupAria: (label: string, n: number) => `${label}，共 ${n} 个项目`,
   },
   toolbox: {
-    num: '03',
+    num: '02',
     title: '工具箱',
     subtitle: '常用的一些家伙事儿',
   },
   about: {
-    num: '04',
+    num: '03',
     title: '关于我',
     paragraphs: [
       {
