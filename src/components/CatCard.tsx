@@ -7,50 +7,41 @@ import { useTheme } from '@/hooks/useTheme'
 import CatFace from '@/components/CatFace'
 import { useCatMicro } from '@/hooks/useCatMicro'
 
-// 真 3D 侧壁：用 N 段薄片绕圆周拼成亚克力筒（半径=徽章半径，高度=厚度）
-const EDGES = 72 // 段数越多轮廓越圆（弦长 2πR/N ≈ 14.8px）
-const EDGE_STEP = 360 / EDGES
+// 真 3D 侧壁 v2：N 个真圆沿 Z 轴阶梯叠出厚度。
+// 旧方案（72 段直边薄片绕圆周拼筒）轮廓是 72 边形，Chromium 对 3D 层不做抗锯齿，
+// 正面看边缘有微小锯齿；真圆叠层轮廓 = 原生抗锯齿圆，锯齿从几何上消除。
+const LAYERS = 30 // 层距 = 厚度/LAYERS ≈ 0.93px（基准 340px 下）+ 每层 0.6px 同色描边封缝，翻转时侧壁连续无漏缝
 // 以下均为「基准直径 340px」下的取值。窄屏时 .badge 会收缩到容器宽度，
 // 侧壁/装饰按实际直径等比换算（scale = 实测直径 / BASE_D），否则侧壁会飞出圆外。
 const BASE_D = 340
 const BASE_EDGE_R = 170 // 徽章半径（340/2）
-const BASE_EDGE_W = 17 // 单段切向宽（> 弦长，保证接缝重叠无漏缝）
 const BASE_EDGE_T = 28 // 侧壁厚度（直径:厚度 ≈ 12:1，薄玻璃水晶牌）
 
-// 亚克力水晶牌色板：周向打光后在 JS 内算色并内联注入
+// 亚克力水晶牌色板：叠层侧壁在 JS 内沿层深连续插值（三锚点，无离散色带）
+// 侧壁随主题呼应正面：浅色=暖白玻璃 / 深色=黑灰玻璃，保留微透（alpha 0.78~0.95）
 // 注意：不能用 filter: brightness()，filter 会强制 flatten 掉 preserve-3d 的 3D 定位
+type RGBA = [number, number, number, number]
 const ACRYLIC = {
   light: {
-    hi2: '#fff6f0', // 前沿折射高光线（最亮）
-    hi: '#ffb59c', // 高光过渡
-    body: 'rgba(240, 101, 60, 0.4)', // 玻璃本体（半透，背景可透出）
-    mid: 'rgba(240, 101, 60, 0.58)',
-    lo: '#b4482a', // 背沿深部
+    mid: [201, 191, 177, 0.9] as RGBA, // 背沿暖灰（背光面，与前沿拉开明度差才有立体感）
+    hi: [236, 230, 221, 0.93] as RGBA, // 高光过渡
+    hi2: [255, 255, 255, 0.96] as RGBA, // 前沿受光高光
   },
   dark: {
-    hi2: '#e8f8ff',
-    hi: '#9ed9fb',
-    body: 'rgba(125, 211, 252, 0.38)',
-    mid: 'rgba(125, 211, 252, 0.55)',
-    lo: '#2b6f8f',
+    mid: [13, 17, 27, 0.82] as RGBA, // 背沿黑灰（呼应正面深色面板）
+    hi: [54, 62, 76, 0.88] as RGBA, // 高光过渡
+    hi2: [128, 138, 154, 0.92] as RGBA, // 前沿受光灰
   },
 } as const
 
-/** 把颜色按系数 k 向黑压暗（支持 #rrggbb 与 rgba()），保留 alpha */
-function dim(color: string, k: number) {
-  if (color.startsWith('#')) {
-    const n = parseInt(color.slice(1), 16)
-    const r = Math.round(((n >> 16) & 255) * k)
-    const g = Math.round(((n >> 8) & 255) * k)
-    const b = Math.round((n & 255) * k)
-    return `rgb(${r}, ${g}, ${b})`
-  }
-  const m = color.match(/rgba?\(([^)]+)\)/)
-  if (!m) return color
-  const [r, g, b, a] = m[1].split(',').map((s) => s.trim())
-  return `rgba(${Math.round(Number(r) * k)}, ${Math.round(Number(g) * k)}, ${Math.round(
-    Number(b) * k,
-  )}, ${a ?? '1'})`
+/** RGBA 两色线性插值，k ∈ [0,1] */
+function mixColor(a: RGBA, b: RGBA, k: number): RGBA {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * k),
+    Math.round(a[1] + (b[1] - a[1]) * k),
+    Math.round(a[2] + (b[2] - a[2]) * k),
+    +(a[3] + (b[3] - a[3]) * k).toFixed(3),
+  ]
 }
 
 // 藏在徽章下一层、透过边缘玻璃透色的探索装饰（x/y = 相对圆心的偏移 px）
@@ -66,7 +57,7 @@ const reducedMotion = () =>
 
 /**
  * Hero 右侧的互动猫徽章：
- * - 圆形亚克力水晶牌 3D 徽章：真 3D 侧壁 40px 厚 + 周向打光 + 前后倒角 + 接触投影
+ * - 圆形亚克力水晶牌 3D 徽章：真 3D 侧壁（真圆叠层 28px 厚）+ 层深打光 + 前后倒角 + 接触投影
  * - 正面头像嵌入亚克力，背面为 slogan + 技术栈图标环
  * - 自由 X+Y 翻转：按住拖拽跟手旋转（可连续 360° 多圈），松手带惯性 elastic 归位正面
  * - 悬停微浮 + 光环呼吸（桌面端；触屏/减弱动效自动关闭）
@@ -93,7 +84,6 @@ export default function CatCard({ ref }: CatCardProps) {
   const stageRef = useRef<HTMLDivElement>(null)
   const badgeRef = useRef<HTMLDivElement>(null)
   const badgeAvaRef = useRef<HTMLDivElement>(null)
-  const ringRef = useRef<HTMLDivElement>(null)
   const flipping = useRef(false)
   const flipped = useRef(false)
   const rot = useRef({ x: 0, y: 0 })
@@ -109,12 +99,14 @@ export default function CatCard({ ref }: CatCardProps) {
   const spinTl = useRef<gsap.core.Timeline | null>(null)
   /** 徽章是否处于运动中（悬停微浮 / 翻转） */
   const moving = useRef({ hover: false, flip: false })
-  /** 运动期间关闭正反面 backdrop-filter：它会每帧重采样背景，是翻转卡顿主因 */
+  /** 运动期间关闭正反面 backdrop-filter：它会每帧重采样背景，是翻转卡顿主因；
+      is-dragging 单独标记拖拽/翻转（含 spin），用于关外投影（悬停微浮不关） */
   const syncMoving = () => {
     badgeRef.current?.classList.toggle(
       'is-moving',
       moving.current.hover || moving.current.flip,
     )
+    badgeRef.current?.classList.toggle('is-dragging', moving.current.flip)
   }
 
   // ── 猫脸微表情：眨眼 / 视线跟随 / 耳朵抖动 / 头部微倾 ──
@@ -137,12 +129,11 @@ export default function CatCard({ ref }: CatCardProps) {
     return () => ro.disconnect()
   }, [])
 
-  // ── 悬停微浮 + 眼神跟随 + 光环呼吸（触屏/减弱动效关闭） ──
+  // ── 悬停微浮 + 眼神跟随（触屏/减弱动效关闭） ──
   useEffect(() => {
     const stage = stageRef.current
     const badge = badgeRef.current
-    const ring = ringRef.current
-    if (!stage || !badge || !ring) return
+    if (!stage || !badge) return
     if (reducedMotion() || window.matchMedia('(hover: none)').matches) return
 
     const ctx = gsap.context(() => {
@@ -176,7 +167,6 @@ export default function CatCard({ ref }: CatCardProps) {
         })
       }
       // 注：整张头像的位移跟随已移除——瞳孔现在会真的动，再加整图平移会变成"双重移动"
-      const ro = gsap.quickTo(ring, 'opacity', { duration: 0.4 })
       const decos = gsap.utils.toArray<HTMLElement>('[data-depth]', stage)
       const decoTo = decos.map((d) => ({
         depth: Number(d.dataset.depth ?? 1),
@@ -189,14 +179,12 @@ export default function CatCard({ ref }: CatCardProps) {
         const rect = badge.getBoundingClientRect()
         const px = (e.clientX - rect.left) / rect.width - 0.5
         const py = (e.clientY - rect.top) / rect.height - 0.5
-        ro(0.5 + Math.abs(px) * 0.5)
         decoTo.forEach(({ depth, x, y }) => {
           x(px * depth * 26)
           y(py * depth * 20)
         })
       }
       const onLeave = () => {
-        ro(0.3)
         decoTo.forEach(({ x, y }) => {
           x(0)
           y(0)
@@ -440,9 +428,8 @@ export default function CatCard({ ref }: CatCardProps) {
   useImperativeHandle(ref, () => ({ spin }), [])
 
   // 侧壁与装饰：按实测直径等比换算（scale 见上方 ResizeObserver）
-  const edgeR = BASE_EDGE_R * scale
-  const edgeW = BASE_EDGE_W * scale
-  const edgeH = BASE_EDGE_T * scale + 1 // +1 避免与正反面共面 z-fighting
+  const edgeD = BASE_EDGE_R * 2 * scale // 叠层圆直径 = 徽章直径
+  const edgeT = BASE_EDGE_T * scale
 
   return (
     <div ref={stageRef} className="cat-stage relative mx-auto w-full max-w-sm select-none">
@@ -478,38 +465,33 @@ export default function CatCard({ ref }: CatCardProps) {
         aria-label={copy.cat.badgeAria}
         onKeyDown={onKeyDown}
       >
-        {/* 真 3D 侧壁：72 段拼成亚克力筒，按角度周向打光（光源左上 135°）
-            渐变 0% = 后沿(z=-T/2) → 100% = 前沿(z=+T/2)，前沿处为明亮折射高光线 */}
-        {Array.from({ length: EDGES }, (_, i) => {
-          const rad = (i * EDGE_STEP * Math.PI) / 180
-          // 圆柱受光：左上 135° 最亮 lit=1，右下最暗 lit=0.68（玻璃受光比金属柔和）
-          const lit = 0.68 + 0.32 * (0.5 + 0.5 * Math.cos(rad - Math.PI * 0.75))
-          const bg = `linear-gradient(180deg, ${dim(palette.lo, lit)} 0%, ${dim(
-            palette.mid,
-            lit,
-          )} 26%, ${dim(palette.body, lit)} 62%, ${dim(palette.hi, lit)} 88%, ${dim(
-            palette.hi2,
-            lit,
-          )} 96%, ${dim(palette.lo, lit)} 100%)`
+        {/* 真 3D 侧壁 v2：LAYERS 个真圆沿 Z 轴叠出厚度（i=0 背沿 → i=末 前沿）
+            颜色沿层深连续插值：mid → hi → hi2，无离散色带/对半分色；
+            层 z 收在 ±(T/2 - step/2) 内，与 ±T/2 的正反面保持半步距，避免共面 z-fighting */}
+        {Array.from({ length: LAYERS }, (_, i) => {
+          const t = i / (LAYERS - 1) // 0 = 背沿 → 1 = 前沿
+          const c =
+            t < 0.55
+              ? mixColor(palette.mid, palette.hi, t / 0.55)
+              : mixColor(palette.hi, palette.hi2, (t - 0.55) / 0.45)
+          const z = (-edgeT / 2 + (edgeT * (i + 0.5)) / LAYERS).toFixed(2)
           return (
             <span
               key={i}
-              className="badge-edge"
+              className="badge-layer"
               style={{
-                width: `${edgeW}px`,
-                height: `${edgeH}px`,
-                marginLeft: `${-edgeW / 2}px`,
-                marginTop: `${-edgeH / 2}px`,
-                transform: `rotateZ(${i * EDGE_STEP}deg) translateY(${edgeR}px) rotateX(90deg)`,
-                background: bg,
+                width: `${edgeD}px`,
+                height: `${edgeD}px`,
+                marginLeft: `${-edgeD / 2}px`,
+                marginTop: `${-edgeD / 2}px`,
+                transform: `translateZ(${z}px)`,
+                background: `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3]})`,
+                boxShadow: `0 0 0 0.6px rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3]})`,
               }}
             />
           )
         })}
 
-        <div className="badge-ring" ref={ringRef} aria-hidden />
-
-        {/* 正面：头像 */}
         <div className="badge-face badge-front">
           <div ref={badgeAvaRef} className="badge-ava">
             <CatFace theme={theme} />

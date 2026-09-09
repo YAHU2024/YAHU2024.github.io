@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import Nav from '@/sections/Nav'
 import HeroLeft from '@/sections/Hero'
@@ -20,20 +20,6 @@ const viewFromHash = (): View => (window.location.hash === '#recent' ? 'recent' 
 
 const REDUCE_MQ = '(prefers-reduced-motion: reduce)'
 
-/** 尘埃粒子：满配 24 颗，负 delay 让页面打开时已在半空 */
-function useDust() {
-  return useMemo(
-    () =>
-      Array.from({ length: 24 }, (_, i) => ({
-        left: `${(i * 11 + 5) % 96}%`,
-        delay: -i * 2.3,
-        sway: i % 2 ? 42 : -36,
-        d: 14 + ((i * 5) % 16),
-      })),
-    [],
-  )
-}
-
 /**
  * 首页 / 最近页双视图容器：
  * - 视图由 URL hash 驱动（#recent），导航点击 / 后退 / 手改地址都能正确落位
@@ -45,7 +31,6 @@ function useDust() {
 export default function Home() {
   const { repos, followers, publicRepos, live } = useGitHub()
   useScrollParallax()
-  const dust = useDust()
 
   const [view, setView] = useState<View>(viewFromHash)
   const [section, setSection] = useState('top')
@@ -218,23 +203,6 @@ export default function Home() {
       </div>
       <div className="blob-par" data-parallax="-0.06" aria-hidden>
         <div className="blob blob-4" />
-      </div>
-
-      {/* 上升微光尘埃（满配 24 颗） */}
-      <div className="dust" aria-hidden>
-        {dust.map((d, i) => (
-          <i
-            key={i}
-            style={
-              {
-                left: d.left,
-                '--d': `${d.d}s`,
-                '--delay': `${d.delay}s`,
-                '--sway': `${d.sway}px`,
-              } as React.CSSProperties
-            }
-          />
-        ))}
       </div>
 
       <ScrollProgress />

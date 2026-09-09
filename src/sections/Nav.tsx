@@ -127,7 +127,7 @@ export default function Nav({ active }: NavProps) {
             href={profile.htmlUrl}
             target="_blank"
             rel="noreferrer"
-            className="btn-pop hidden items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-bold text-[var(--accent-ink)] sm:flex"
+            className="btn-pop btn-accent-glass hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-[var(--accent-ink)] sm:flex"
           >
             <Github className="h-4 w-4" />
             {copy.nav.github}
@@ -192,7 +192,7 @@ export default function Nav({ active }: NavProps) {
                   target="_blank"
                   rel="noreferrer"
                   onClick={close}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3.5 text-sm font-bold text-[var(--accent-ink)]"
+                  className="btn-accent-glass flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold"
                 >
                   <Github className="h-4 w-4" />
                   {copy.nav.github}

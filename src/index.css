@@ -35,7 +35,6 @@
   --edge-lo: #c44a26;
   --face-base: rgba(255, 253, 250, 0.75); /* 面：玻璃色调，阻断看穿（透明集中在边缘） */
   --badge-filter: none; /* 面背景模糊：A/B 开关，置 blur(10px) 可恢复并复现边缘锯齿 */
-  --badge-feather: rgba(240, 101, 60, 0.3); /* 边缘羽化环：置 transparent 可单点关闭做对照 */
   --badge-hi: rgba(255, 255, 255, 0.78);
   --badge-inset: rgba(255, 255, 255, 0.28);
   --accent-ink: #ffffff;
@@ -63,9 +62,6 @@
   --speed: 0.38;
   --travel: 2.6;
   --op-boost: 1.7;
-  --dust-speed: 0.42;
-  --dust-size: 5.5px;
-  --dust-op: 0.5;
   --cat-dim: none;
 
   /* shadcn 兼容变量（ui 组件与 tailwind 语义色使用） */
@@ -81,7 +77,7 @@
   --secondary-foreground: 240 8% 18%;
   --muted: 40 20% 92%;
   --muted-foreground: 240 6% 35%;
-  --accent: 15 85% 59%;
+  --accent-hsl: 15 85% 59%; /* shadcn 兼容（裸 HSL 分量）；原名 --accent 会覆盖上面的品牌色，致 color-mix(var(--accent)) 全部失效 */
   --accent-foreground: 0 0% 100%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 98%;
@@ -110,7 +106,6 @@
   --edge-lo: #2f6f8c;
   --face-base: rgba(19, 25, 40, 0.72);
   --badge-filter: none; /* 与浅色同开关 */
-  --badge-feather: rgba(125, 211, 252, 0.28);
   --badge-hi: rgba(255, 255, 255, 0.12);
   --badge-inset: rgba(255, 255, 255, 0.06);
   --accent-ink: #072331;
@@ -138,9 +133,6 @@
   --speed: 0.38;
   --travel: 2.6;
   --op-boost: 1.7;
-  --dust-speed: 0.42;
-  --dust-size: 5.5px;
-  --dust-op: 0.5;
   --cat-dim: saturate(0.82) brightness(0.9);
 
   --background: 230 35% 7%;
@@ -155,7 +147,7 @@
   --secondary-foreground: 214 40% 96%;
   --muted: 228 20% 16%;
   --muted-foreground: 218 17% 74%;
-  --accent: 199 95% 74%;
+  --accent-hsl: 199 95% 74%; /* 同 :root，避免覆盖品牌色 --accent */
   --accent-foreground: 200 80% 10%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 98%;
@@ -188,7 +180,7 @@
     transition: background-color 0.45s ease, color 0.45s ease;
   }
   ::selection {
-    background: hsl(var(--accent) / 0.35);
+    background: hsl(var(--accent-hsl) / 0.35);
   }
 }
 
@@ -335,42 +327,6 @@
   }
 }
 
-/* 上升的微光尘埃：24 颗，速度/尺寸由主题变量控制 */
-.dust {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-.dust i {
-  position: absolute;
-  bottom: -3vh;
-  width: var(--dust-size, 4.5px);
-  height: var(--dust-size, 4.5px);
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0;
-  animation: dust-rise calc(var(--dust-speed, 1) * var(--d, 20s)) linear infinite;
-  animation-delay: var(--delay, 0s);
-}
-@keyframes dust-rise {
-  0% {
-    transform: translate3d(0, 0, 0);
-    opacity: 0;
-  }
-  12% {
-    opacity: var(--dust-op);
-  }
-  85% {
-    opacity: var(--dust-op);
-  }
-  100% {
-    transform: translate3d(var(--sway, 30px), -108vh, 0);
-    opacity: 0;
-  }
-}
-
 /* 内容层压在光斑之上 */
 .layer-content {
   position: relative;
@@ -417,6 +373,12 @@
   z-index: 1;
   box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.38); /* 减薄后投影相应收敛 */
 }
+/* 拖拽/翻转（含 spin）时关掉本体外投影：box-shadow 画在 z=0 平面，
+   倾斜时会从半透明侧壁后面透出，成为侧壁中部的"黑色阴影层"；
+   悬停微浮（is-moving 但非 is-dragging）不关，保留静止悬浮感 */
+.badge.is-dragging {
+  box-shadow: none;
+}
 .badge:active {
   cursor: grabbing;
 }
@@ -425,16 +387,6 @@
   box-shadow: 0 0 0 3px var(--accent);
 }
 /* 光环（悬停时由 JS 提升 opacity） */
-.badge-ring {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  opacity: 0.3;
-  pointer-events: none;
-  box-shadow: 0 0 18px var(--accent-glow);
-  transition: opacity 0.4s ease;
-}
 /* 正反两面 */
 .badge-face {
   position: absolute;
@@ -458,8 +410,6 @@
     radial-gradient(120% 120% at 30% 22%, var(--badge-hi), transparent 55%),
     var(--face-base);
   box-shadow:
-    /* 羽化环：外侧虚化 2px，把硬裁切边界摊成渐变，等效抗锯齿 */ 0 0 2px 0.5px
-      var(--badge-feather),
     inset 0 1px 0 var(--glow-inner),
     /* 站点玻璃顶部高光 */ inset 0 0 0 4px var(--glow-inner),
     /* 前倒角亮环（半透高光，非实色金属） */ inset 0 0 26px var(--accent-soft),
@@ -472,9 +422,9 @@
     var(--face-base);
   border: 1px solid var(--gborder);
   box-shadow:
-    /* 背面同样羽化（翻转后可见） */ 0 0 2px 0.5px var(--badge-feather),
-    inset 0 0 0 4px rgba(0, 0, 0, 0.22),
-    /* 后倒角暗环 */ inset 0 0 26px var(--accent-soft);
+    inset 0 0 26px var(--accent-soft);
+  /* 旧版背面 4px 黑色内环（rgba(0,0,0,0.22)）已移除：拖拽倾斜时它会从
+     半透侧壁后透出，成为两段色带之间的"黑色阴影层" */
   /* 旧版背面文案（slogan + 图标环）遗留的 padding/gap/flex-direction 已清除：
      否则 .badge-back-ava 的 88.235% 会以缩小后的 content box 为基准（254px），
      与正面矢量猫碗（300px）的边缘圆环错位 */
@@ -535,13 +485,14 @@
 /* 真 3D 侧壁：72 段拼成亚克力筒
    尺寸（width/height/margin）与颜色均由 JS 内联注入：
    颜色需按角度周向打光，且不能用 filter（会 flatten 掉 preserve-3d） */
-.badge-edge {
+.badge-layer {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform-origin: center center;
+  border-radius: 50%;
   /* 不要加 will-change：侧壁是静态的（只有父级 .badge 在转），
-     加了会强制生成 72 个合成层，纯浪费且拖慢 3D 排序 */
+     20 层真圆远少于旧 72 段薄片，合成压力同步下降 */
+  pointer-events: none;
 }
 /* 接触投影：撑起重量感（z-index 0，位于徽章 z-index 1 之下） */
 .badge-shadow {
@@ -594,9 +545,6 @@
   .blob {
     animation: none;
   }
-  .dust {
-    display: none;
-  }
 }
 
 /* ============================================================
@@ -620,7 +568,6 @@
     radial-gradient(120% 120% at 32% 22%, var(--badge-hi), transparent 55%),
     var(--face-base);
   box-shadow:
-    0 0 2px 0.5px var(--badge-feather),
     inset 0 1px 0 var(--glow-inner),
     inset 0 0 0 4px var(--glow-inner),
     inset 0 0 16px var(--accent-soft),
@@ -830,6 +777,32 @@
 }
 .btn-pop:active {
   transform: scale(0.96);
+}
+/* ── 彩色玻璃按钮（主 CTA）：accent 72% 半透底 + 顶部 sheen + blur + accent 描边 ──
+   替代纯色 bg-accent：保持 accent-ink 文字对比（与原实色按钮同族明度），
+   玻璃感来自 blur / 内高光 / 描边。transition 含 transform 以兼容 .btn-pop 的 hover 上浮 */
+.btn-accent-glass {
+  /* 采用与 .glass-card / .glass 同族的玻璃配方：
+     --glass 底 + --gborder 边 + blur(18px) + --glow-inner 内高光，
+     仅把 accent 按比例混入底色与描边，不再叠加白色高光渐变 */
+  color: #ffffff;
+  background: color-mix(in srgb, var(--accent) 100%, var(--glass));
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--gborder));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    inset 0 1px 0 var(--glow-inner),
+    0 12px 30px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.45s ease,
+    border-color 0.45s ease;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .btn-accent-glass {
+    /* 无 blur 能力时回退实色玻璃面板色，对比度不变 */
+    background: color-mix(in srgb, var(--accent) 45%, var(--glass-solid));
+  }
 }
 /* 行内箭头微移：挂在图标/箭头元素上 */
 .ar-pop {

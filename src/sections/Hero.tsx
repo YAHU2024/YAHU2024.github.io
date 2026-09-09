@@ -108,8 +108,7 @@ export default function HeroLeft({ publicRepos, repos }: HeroLeftProps) {
         <div className="mt-9 flex flex-wrap gap-4">
           <a
             href="#projects"
-            className="btn-pop rounded-xl bg-accent px-6 py-3 font-bold text-[var(--accent-ink)]"
-            style={{ boxShadow: '0 12px 30px rgba(0,0,0,0.18)' }}
+            className="btn-pop btn-accent-glass rounded-xl px-6 py-3 font-bold"
           >
             {copy.hero.ctaProjects} <ArrowDown className="ml-1 inline h-4 w-4" />
           </a>
