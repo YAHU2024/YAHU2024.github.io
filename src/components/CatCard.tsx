@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { PointerEvent as RPointerEvent, KeyboardEvent as RKeyboardEvent } from 'react'
+import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
+import type { PointerEvent as RPointerEvent, KeyboardEvent as RKeyboardEvent, Ref } from 'react'
 import gsap from 'gsap'
 import { profile } from '@/data/github'
 import { copy } from '@/data/copy'
@@ -76,7 +76,17 @@ const reducedMotion = () =>
  * - 昼夜联动：切深色猫咪打瞌睡冒 Zzz，切浅色秒醒抖毛撒星星
  * - 键盘：聚焦后 Enter/Space 翻到背面停留，再按回正面
  */
-export default function CatCard() {
+/** 对外暴露的命令句柄：Home 在视图切换转场时调用 spin() */
+export interface CatCardHandle {
+  /** 整圈物理旋转：back.out 回弹 + squash & stretch，装饰/投影不随转而受扰 */
+  spin: () => void
+}
+
+interface CatCardProps {
+  ref?: Ref<CatCardHandle>
+}
+
+export default function CatCard({ ref }: CatCardProps) {
   const [theme] = useTheme()
   /** 亚克力色板随主题切换 */
   const palette = ACRYLIC[theme === 'dark' ? 'dark' : 'light']
@@ -95,6 +105,8 @@ export default function CatCard() {
   const [scale, setScale] = useState(1)
   const floatRef = useRef<gsap.core.Tween | null>(null)
   const rafRef = useRef(0)
+  /** 视图切换的整圈旋转时间线（spin 用，便于连点时掐掉重来） */
+  const spinTl = useRef<gsap.core.Timeline | null>(null)
   /** 徽章是否处于运动中（悬停微浮 / 翻转） */
   const moving = useRef({ hover: false, flip: false })
   /** 运动期间关闭正反面 backdrop-filter：它会每帧重采样背景，是翻转卡顿主因 */
@@ -365,6 +377,67 @@ export default function CatCard() {
       )
     })
   }, [theme])
+
+  // ── 视图切换整圈旋转（Home 转场时经 ref 调用）──
+  // 直接转 .badge 本体：stage 的 perspective + preserve-3d 全程有效，侧壁 3D 不被拍扁。
+  // 物理感 = back.out 回弹（冲过 360° 再落回）+ squash & stretch + 投影同步压缩；
+  // 装饰 emoji 在旋转层之外天然不随转，仅做错相位受扰抖动。
+  const spin = () => {
+    const badge = badgeRef.current
+    const stage = stageRef.current
+    if (!badge || !stage) return
+    if (reducedMotion()) return
+
+    spinTl.current?.kill()
+    gsap.killTweensOf(badge)
+    const decos = gsap.utils.toArray<HTMLElement>('[data-depth]', stage)
+    decos.forEach((d) => gsap.killTweensOf(d))
+    // 悬停微浮若在跑，让位给旋转（结束后由下一次 mouseenter 重建）
+    if (floatRef.current) {
+      floatRef.current.kill()
+      floatRef.current = null
+    }
+
+    moving.current.flip = true
+    syncMoving()
+    setMicroPaused(true)
+
+    // 单段惯性设计（刻意保持简单，抗打断优先）：
+    //   一条 to rotationY: 360 的 back.out 缓动——「冲过落点→弹回停平」由缓动曲线自带，
+    //   没有独立的回正段/缩放键帧/投影键帧，不存在可被掐断后变成孤儿的分段。
+    //   目标是绝对值 360：任何时刻被新切换打断重开，新 tween 都从当前角度平滑续转到
+    //   同一落点，兜底场景（切换过快）不会出现硬回正或残留形变。
+    const tl = gsap.timeline({
+      onComplete: () => {
+        moving.current.flip = false
+        syncMoving()
+        setMicroPaused(false)
+        gsap.set(badge, { rotationY: 0, scale: 1 })
+      },
+    })
+    spinTl.current = tl
+
+    tl.to(badge, { rotationY: 360, duration: 1.0, ease: 'back.out(1.2)' }, 0)
+
+    // 装饰受扰抖动：独立轨、方向交替、相位错开（只动 rotation/scale，不碰 hover 视差的 x/y）
+    decos.forEach((d, i) => {
+      const dir = i % 2 ? -1 : 1
+      tl.to(
+        d,
+        {
+          keyframes: [
+            { rotation: 14 * dir, scale: 1.18, duration: 0.14 },
+            { rotation: -9 * dir, scale: 0.92, duration: 0.16 },
+            { rotation: 5 * dir, scale: 1.06, duration: 0.14 },
+            { rotation: 0, scale: 1, duration: 0.5, ease: 'elastic.out(1, 0.45)' },
+          ],
+        },
+        0.25 + i * 0.08,
+      )
+    })
+  }
+
+  useImperativeHandle(ref, () => ({ spin }), [])
 
   // 侧壁与装饰：按实测直径等比换算（scale 见上方 ResizeObserver）
   const edgeR = BASE_EDGE_R * scale

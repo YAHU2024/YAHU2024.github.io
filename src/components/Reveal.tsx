@@ -1,10 +1,10 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, type HTMLAttributes, type ReactNode } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-interface RevealProps {
+interface RevealProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
   /** 入场延迟（毫秒），网格错峰用 */
   delay?: number
@@ -16,8 +16,9 @@ interface RevealProps {
  * - 淡入 + 轻微缩放 + 上移，back.out 弹性收尾
  * - once:true 只播一次，不随滚动反向回放
  * - prefers-reduced-motion 下直接渲染最终态；无 JS 时内容同样可见
+ * - 其余 HTML 属性（如 data-tz 转场标记）透传给外层 div
  */
-export default function Reveal({ children, delay = 0, className = '' }: RevealProps) {
+export default function Reveal({ children, delay = 0, className = '', ...rest }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function Reveal({ children, delay = 0, className = '' }: RevealPr
   }, [delay])
 
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={className} {...rest}>
       {children}
     </div>
   )

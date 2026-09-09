@@ -35,7 +35,7 @@ export const projects: ProjectItem[] = [
     name: 'Unarchive',
     emoji: '🎙️',
     status: 'doing',
-    oneLine: '音频转写 + 哔哩哔哩视频处理，本地 ASR 闭环已通、待真机验证',
+    oneLine: 'UI重构进行中，B站视频转笔记流程已打通',
     progress: 40,
     platform: ['Android'],
     tags: ['sherpa-onnx', 'SenseVoice', 'SiliconFlow'],

@@ -36,7 +36,7 @@ export const profile = {
   },
   tagline: '开发 AI 时代的个人工具 · vibe coding 实践者',
   /** 已不在 Hero 展示：那个位置换成了「最近」标签 + src/data/now.ts 的 recent */
-  subtitle: '喜欢把一个想法从"跑起来"打磨到"用得爽"。',
+  subtitle: '喜欢把一个想法从"跑起来"打磨到"用得舒服"。',
 }
 
 export interface ToolboxItem {

@@ -26,6 +26,8 @@ export default function Nav() {
   const close = () => setOpen(false)
 
   const navItems = [
+    { href: '#top', label: copy.nav.home },
+    { href: '#recent', label: copy.nav.recent },
     { href: '#projects', label: copy.nav.projects },
     { href: '#toolbox', label: copy.nav.toolbox },
     { href: '#about', label: copy.nav.about },

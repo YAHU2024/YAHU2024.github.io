@@ -475,10 +475,9 @@
     /* 背面同样羽化（翻转后可见） */ 0 0 2px 0.5px var(--badge-feather),
     inset 0 0 0 4px rgba(0, 0, 0, 0.22),
     /* 后倒角暗环 */ inset 0 0 26px var(--accent-soft);
-  flex-direction: column;
-  gap: 18px;
-  padding: 26px;
-  text-align: center;
+  /* 旧版背面文案（slogan + 图标环）遗留的 padding/gap/flex-direction 已清除：
+     否则 .badge-back-ava 的 88.235% 会以缩小后的 content box 为基准（254px），
+     与正面矢量猫碗（300px）的边缘圆环错位 */
 }
 .badge-ava {
   position: relative;
@@ -508,6 +507,21 @@
   -webkit-user-drag: none;
   user-select: none;
   -webkit-user-select: none;
+}
+/* 背面头像碗的内凹阴影（与正面 .badge-ava 同规格）：
+   <img> 是替换元素，自身的 inset box-shadow 会被图片内容盖住画不出来，
+   用 ::after 覆盖层补上——尺寸对齐 88.235% 头像圆，悬于图片之上、不响应指针 */
+.badge-back::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 88.235%;
+  height: 88.235%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.24);
+  pointer-events: none;
 }
 
 /* 运动期间（悬停微浮 / 翻转）关闭正反面背景模糊：

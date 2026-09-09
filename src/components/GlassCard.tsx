@@ -1,8 +1,8 @@
-import { useRef, type ReactNode } from 'react'
+import { useRef, type HTMLAttributes, type ReactNode } from 'react'
 import { useTilt } from '@/hooks/useTilt'
 import { useSheen } from '@/hooks/useSheen'
 
-interface GlassCardProps {
+interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
   /** 外层附加类：尺寸 / 布局 / 间距 / 圆角覆盖 */
   className?: string
@@ -29,6 +29,7 @@ export default function GlassCard({
   tilt = false,
   maxTilt = 6,
   sheen = true,
+  ...rest
 }: GlassCardProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
@@ -37,7 +38,7 @@ export default function GlassCard({
   useSheen(rootRef, { enabled: sheen })
 
   return (
-    <div ref={rootRef} className={`glass-card glass ${className}`}>
+    <div ref={rootRef} className={`glass-card glass ${className}`} {...rest}>
       {sheen && <div className="glass-sheen" aria-hidden />}
       <div ref={innerRef} className={`glass-card-in ${innerClassName}`}>
         {children}

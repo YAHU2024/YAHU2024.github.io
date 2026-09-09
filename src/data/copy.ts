@@ -11,12 +11,21 @@ export const copy = {
   nav: {
     brand: 'YAHU',
     brandDot: '.',
+    home: '首页',
+    recent: '最近',
     projects: '项目',
     toolbox: '工具箱',
     about: '关于',
     github: 'GitHub',
     menuOpen: '打开菜单',
     menuClose: '关闭菜单',
+  },
+  /** 「最近」页（#recent 视图）：布局参考 sandev.cc/zh/notes，玻璃卡风格化 */
+  recentPage: {
+    title: '最近。',
+    desc: '记录最近在做的事，和一些想法计划。',
+    notesTitle: '动态',
+    plansTitle: '计划',
   },
   hero: {
     hello: '👋 你好，我是 YAHU',
@@ -34,7 +43,6 @@ export const copy = {
     ctaProjects: '看看我的项目',
     github: 'GitHub',
     /** 「最近」小标签，后跟 src/data/now.ts 的 recent 两行内容 */
-    recentLabel: '最近',
   },
   now: {
     num: '00',
