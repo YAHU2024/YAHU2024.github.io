@@ -721,6 +721,33 @@
 .gc-z1 {
   transform: translateZ(24px);
 }
+/* ── 占位卡磨砂层（PlaceholderCard 专用）──
+   霜化 = 内容级 blur（.glass-card-in 整体 9px，文字糊到不可读）+ 雾面提亮 tint 层；
+   hover 时两者同时消散（filter→blur(0)、tint opacity→0），露出玻璃本色。
+   注意：filter 会 flatten preserve-3d——占位卡未启用 tilt，无 3D 分层需求，可安全使用 */
+.placeholder-card .glass-card-in {
+  filter: blur(9px);
+  transition: filter 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.placeholder-card:hover .glass-card-in {
+  filter: blur(0);
+}
+.frost-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.02) 45%,
+    transparent 80%
+  );
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.placeholder-card:hover .frost-layer {
+  opacity: 0;
+}
 .gc-z2 {
   transform: translateZ(40px);
 }

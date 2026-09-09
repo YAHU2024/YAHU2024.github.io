@@ -58,10 +58,11 @@ export const now = {
       status: '开发中',
     },
     {
-      tag: '（想法位）',
-      title: '下一个值得动手的想法',
-      desc: '想清楚之后再补名称和仓库。',
-      status: '想做',
+      tag: 'QUICKTRANSLATE',
+      title: '截图翻译开发',
+      desc: '生产级OCR截图翻译，复杂背景/漫画识别，自动路由',
+      progress: 60,
+      status: '开发中',
     },
   ] satisfies PlanEntry[],
 }

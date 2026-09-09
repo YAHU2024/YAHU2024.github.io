@@ -134,12 +134,13 @@ function ProjectCard({ p }: { p: ProjectItem }) {
 }
 
 /**
- * 占位卡（仅 PC 端渲染）：与项目卡同款玻璃卡骨架，内容为灰调占位文案，
- * 避免每组只有一张卡时右侧空格。不参与 tilt / 无障碍语义（aria-hidden 由外层控制）。
+ * 占位卡（仅 PC 端渲染）：与项目卡同款玻璃卡骨架，表面覆磨砂层（.frost-layer），
+ * hover 时磨砂渐隐露出玻璃本色。不参与 tilt、关闭光斑，视觉不抢戏。
  */
 function PlaceholderCard() {
   return (
-    <GlassCard className="h-full p-7" sheen={false}>
+    <GlassCard className="placeholder-card h-full p-7" sheen={false}>
+      <span className="frost-layer" aria-hidden />
       <div className="gc-z1 mb-4 flex items-center justify-between gap-3">
         <span
           className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl opacity-60"
