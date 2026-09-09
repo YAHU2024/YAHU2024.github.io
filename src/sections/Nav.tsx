@@ -1,17 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import { Github, Menu, X } from 'lucide-react'
 import { profile } from '@/data/github'
 import { copy } from '@/data/copy'
 import ThemeToggle from '@/components/ThemeToggle'
 
+interface NavProps {
+  /** 当前激活锚点（top / recent / projects / toolbox / about），由 Home 的滚动侦测与视图状态驱动 */
+  active: string
+}
+
 /**
  * 顶部导航：
- * - 桌面（sm+）：项目 / 工具箱 / 关于 + 主题切换 + GitHub 按钮，链接带下划线生长微交互
+ * - 桌面（sm+）：首页 / 最近 / 项目 / 工具箱 / 关于 + 主题切换 + GitHub 按钮
+ *   active 项由 accent-soft 玻璃胶囊标记（GSAP 驱动 x/width 滑动），文字变 accent
  * - 移动（<sm）：锚点链接折叠进汉堡抽屉（玻璃面板 + 大触控行），点选后平滑滚动并收起
  * - 抽屉可访问性：aria-expanded / aria-controls / Esc 关闭 / 点击遮罩关闭
  */
-export default function Nav() {
+export default function Nav({ active }: NavProps) {
   const [open, setOpen] = useState(false)
+  const desktopNavRef = useRef<HTMLElement>(null)
+  const pillRef = useRef<HTMLSpanElement>(null)
+  const prevActive = useRef('')
+  const activeRef = useRef(active)
+  activeRef.current = active
 
   // Esc 关闭抽屉
   useEffect(() => {
@@ -33,6 +45,47 @@ export default function Nav() {
     { href: '#about', label: copy.nav.about },
   ]
 
+  // 胶囊滑动：首次出现直接就位（无动画），此后 active 变化时 0.35s 滑到新项。
+  // overwrite:'auto' 杀掉同属性旧 tween——快速滚动时多个滑行请求不会互相覆盖卡死。
+  // 横向 ±6px 呼吸边距，保证胶囊完全罩住文字。
+  useEffect(() => {
+    const nav = desktopNavRef.current
+    const pill = pillRef.current
+    if (!nav || !pill) return
+    const link = nav.querySelector<HTMLAnchorElement>(`a[data-anchor="${active}"]`)
+    if (!link || !nav.offsetParent) return
+    const target = { x: link.offsetLeft - 6, width: link.offsetWidth + 12 }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prevActive.current === '' || reduce) gsap.set(pill, target)
+    else {
+      // 滑动期间关 blur（backdrop-filter 每帧重采样），滑完恢复真玻璃
+      pill.classList.add('is-moving')
+      gsap.to(pill, {
+        ...target,
+        duration: 0.35,
+        ease: 'power3.out',
+        overwrite: 'auto',
+        onComplete: () => pill.classList.remove('is-moving'),
+      })
+    }
+    prevActive.current = active
+  }, [active])
+
+  // 断点跨越 / 字体加载导致宽度变化时，无动画重新就位（读 ref 里的当前 active，不随其重跑）
+  useEffect(() => {
+    const reposition = () => {
+      const nav = desktopNavRef.current
+      const pill = pillRef.current
+      if (!nav || !pill || !nav.offsetParent) return
+      const link = nav.querySelector<HTMLAnchorElement>(`a[data-anchor="${activeRef.current}"]`)
+      if (!link) return
+      gsap.set(pill, { x: link.offsetLeft - 6, width: link.offsetWidth + 12 })
+    }
+    window.addEventListener('resize', reposition)
+    document.fonts?.ready.then(reposition).catch(() => {})
+    return () => window.removeEventListener('resize', reposition)
+  }, [])
+
   return (
     <header
       className="sticky top-0 z-50 w-full border-b backdrop-blur-md"
@@ -45,13 +98,27 @@ export default function Nav() {
         </a>
 
         <div className="flex items-center gap-4 sm:gap-6">
-          {/* 桌面导航链接（<640px 隐藏，由汉堡抽屉接管） */}
-          <nav className="hidden items-center gap-6 text-[0.95rem] font-semibold text-muted sm:flex">
-            {navItems.map((l) => (
-              <a key={l.href} href={l.href} className="nav-link">
-                {l.label}
-              </a>
-            ))}
+          {/* 桌面导航链接（<640px 隐藏，由汉堡抽屉接管）：胶囊背景 + 激活态文字 */}
+          <nav
+            ref={desktopNavRef}
+            className="relative hidden items-center gap-6 text-[0.95rem] font-semibold text-muted sm:flex"
+          >
+            <span ref={pillRef} className="nav-pill" aria-hidden />
+            {navItems.map((l) => {
+              const anchor = l.href.slice(1)
+              const isActive = anchor === active
+              return (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  data-anchor={anchor}
+                  aria-current={isActive || undefined}
+                  className={`nav-link${isActive ? ' is-active' : ''}`}
+                >
+                  {l.label}
+                </a>
+              )
+            })}
           </nav>
 
           <ThemeToggle />
@@ -96,19 +163,25 @@ export default function Nav() {
           >
             <div className="pt-2">
               <div className="menu-panel rounded-2xl p-1.5">
-                {navItems.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    onClick={close}
-                    className="flex items-center justify-between rounded-xl px-4 py-3.5 text-base font-extrabold transition-colors hover:bg-[var(--glass-strong)]"
-                  >
-                    {l.label}
-                    <span className="ar-pop text-sm text-accent" aria-hidden>
-                      →
-                    </span>
-                  </a>
-                ))}
+                {navItems.map((l) => {
+                  const isActive = l.href.slice(1) === active
+                  return (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      onClick={close}
+                      aria-current={isActive || undefined}
+                      className={`flex items-center justify-between rounded-xl px-4 py-3.5 text-base font-extrabold transition-colors hover:bg-[var(--glass-strong)]${
+                        isActive ? ' text-accent' : ''
+                      }`}
+                    >
+                      {l.label}
+                      <span className="ar-pop text-sm text-accent" aria-hidden>
+                        →
+                      </span>
+                    </a>
+                  )
+                })}
                 <div
                   className="mx-2 my-1.5 h-px"
                   style={{ background: 'var(--line)' }}

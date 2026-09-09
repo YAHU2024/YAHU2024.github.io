@@ -756,6 +756,44 @@
 .nav-link:hover::after {
   transform: scaleX(1);
 }
+/* ── 顶栏激活态（方案 B · 滑动玻璃胶囊）──
+   胶囊为绝对定位背景，x/width 由 Nav 内 GSAP 驱动；
+   与 hero hello 徽章、状态徽章同款 accent-soft pill 语言 */
+.nav-pill {
+  position: absolute;
+  top: calc(50% - 15px);
+  height: 30px;
+  width: 0;
+  border-radius: 10px; /* 圆角矩形（非 stadium），与站点卡片圆角语言一致 */
+  /* 真·玻璃：.glass 同款 blur/描边/内高光 + accent 染色底 */
+  background: color-mix(in srgb, var(--accent) 14%, var(--glass));
+  border: 1px solid var(--gborder);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    inset 0 1px 0 var(--glow-inner),
+    inset 0 0 10px var(--accent-soft);
+  pointer-events: none;
+}
+/* 无 backdrop-filter 能力时的纯色回退（.glass 同款策略） */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav-pill {
+    background: var(--glass-solid);
+  }
+}
+/* 滑动期间关 blur：backdrop-filter 每帧重采样，运动期降级（复用 .badge is-moving 策略） */
+.nav-pill.is-moving {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.nav-link.is-active {
+  /* 规则须位于 :hover 之后：同权重下保证激活色压过 hover 色 */
+  color: var(--accent);
+}
+.nav-link.is-active::after {
+  /* pill 已是激活信号，停用下划线避免双信号叠印 */
+  transform: scaleX(0);
+}
 /* 按钮弹性：hover 上浮 overshoot + 按压压入 */
 .btn-pop {
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);

@@ -48,8 +48,48 @@ export default function Home() {
   const dust = useDust()
 
   const [view, setView] = useState<View>(viewFromHash)
+  const [section, setSection] = useState('top')
   const viewRef = useRef(view)
   viewRef.current = view
+
+  // 猫列在首页态的文档纵坐标：作为最近页 sticky 的 top，
+  // 保证两页猫徽章高度一致、切换零位移、滚动零 travel（sticky top ≥ 天然位置 = 首帧即钉住）
+  const catColRef = useRef<HTMLDivElement>(null)
+  const [catTop, setCatTop] = useState(240)
+  useLayoutEffect(() => {
+    if (view !== 'home') return
+    const measure = () => {
+      const el = catColRef.current
+      if (!el) return
+      setCatTop(el.getBoundingClientRect().top + window.scrollY)
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    document.fonts?.ready.then(measure).catch(() => {})
+    return () => window.removeEventListener('resize', measure)
+  }, [view])
+
+  // 首页视图下的滚动侦测：区块穿过视口中带（40%~45%）即视为当前区域；
+  // 最近页是独立视图，没有滚动区域，直接锁定 recent
+  useEffect(() => {
+    if (view !== 'home') return
+    const els = ['top', 'projects', 'toolbox', 'about']
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el))
+    if (!els.length) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setSection((e.target as HTMLElement).id)
+        }
+      },
+      { rootMargin: '-40% 0px -55% 0px', threshold: 0 },
+    )
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [view])
+
+  const active = view === 'recent' ? 'recent' : section
 
   const contentRef = useRef<HTMLDivElement>(null)
   const catApi = useRef<CatCardHandle>(null)
@@ -198,7 +238,7 @@ export default function Home() {
       </div>
 
       <ScrollProgress />
-      <Nav />
+      <Nav active={active} />
       <main>
         {/* 首屏双栏：左半屏内容随视图切换，右半屏猫徽章常驻（recent 视图下 sticky） */}
         <section id="top" className="layer-content px-6 pb-16 pt-14 md:pb-24 md:pt-24">
@@ -215,12 +255,16 @@ export default function Home() {
               )}
             </div>
 
-            <Reveal
-              delay={150}
-              className={view === 'recent' ? 'lg:sticky lg:top-24 lg:self-start' : undefined}
+            {/* 猫列：首页态随 items-center 居中；最近页 sticky 钉在量取到的首页同高位置 */}
+            <div
+              ref={catColRef}
+              className={view === 'recent' ? 'lg:sticky lg:self-start' : undefined}
+              style={view === 'recent' ? { top: `${catTop}px` } : undefined}
             >
-              <CatCard ref={catApi} />
-            </Reveal>
+              <Reveal delay={150}>
+                <CatCard ref={catApi} />
+              </Reveal>
+            </div>
           </div>
         </section>
 
