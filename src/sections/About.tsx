@@ -1,7 +1,16 @@
 import { copy } from '@/data/copy'
+import { parseRichText } from '@/lib/richText'
 import Reveal from '@/components/Reveal'
 
+/** 强调样式：strong 用前景色，accent 用站点强调色 */
+const KIND_CLASS: Record<'strong' | 'accent', string> = {
+  strong: 'font-extrabold text-foreground',
+  accent: 'font-extrabold text-accent',
+}
+
 export default function About() {
+  const tokens = parseRichText(copy.about.text)
+
   return (
     <section id="about" className="layer-content px-6 py-16">
       <div className="mx-auto max-w-3xl">
@@ -12,27 +21,17 @@ export default function About() {
           </h2>
         </Reveal>
         <Reveal delay={100}>
-          <div className="mt-8 space-y-4 text-center text-lg leading-relaxed text-muted">
-            {copy.about.paragraphs.map((p, i) => (
-              <p key={i}>
-                {p.segments.map((seg, j) => {
-                  if ('strong' in seg)
-                    return (
-                      <b key={j} className="font-extrabold text-foreground">
-                        {seg.text}
-                      </b>
-                    )
-                  if ('accent' in seg)
-                    return (
-                      <b key={j} className="font-extrabold text-accent">
-                        {seg.text}
-                      </b>
-                    )
-                  return <span key={j}>{seg.text}</span>
-                })}
-              </p>
-            ))}
-          </div>
+          <p className="mt-8 text-center text-lg leading-relaxed text-muted">
+            {tokens.map((t, i) =>
+              t.kind ? (
+                <b key={i} className={KIND_CLASS[t.kind]}>
+                  {t.text}
+                </b>
+              ) : (
+                <span key={i}>{t.text}</span>
+              ),
+            )}
+          </p>
         </Reveal>
       </div>
     </section>

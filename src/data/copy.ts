@@ -79,26 +79,13 @@ export const copy = {
   about: {
     num: '03',
     title: '关于我',
-    paragraphs: [
-      {
-        segments: [
-          { text: '我是 ' },
-          { text: 'YAHU', strong: true },
-          { text: '，喜欢把日常中的需求做成' },
-          { text: '顺手的软件', accent: true },
-          { text: '。热爱 vibe coding，习惯先让它跑起来，再把它打磨好。' },
-        ],
-      },
-      {
-        segments: [
-          { text: '比起"大而全"，我更享受把一个小工具做到顺手的过程。最近主要在折腾' },
-          { text: ' AI 桌面应用', strong: true },
-          { text: '和' },
-          { text: '知识流水线', strong: true },
-          { text: '。' },
-        ],
-      },
-    ],
+    /**
+     * 一整段正文（唯一改动入口）。
+     * 支持轻量标记：**粗体**（foreground）、*强调*（accent）。
+     * 例：'我是 **YAHU**，喜欢把日常需求做成*顺手的软件*。'
+     * 注意：正文中若要显示字面量星号，暂不支持转义，请改用中文全角＊。
+     */
+    text: '我是 **YAHU**，喜欢把日常需求做成*顺手的软件*。习惯先让它跑起来，再把它打磨好。',
   },
   footer: {
     brand: 'YAHU',
