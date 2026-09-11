@@ -77,6 +77,15 @@ export default function BackToTop() {
           .to(eyeRef.current, { scaleY: 0.1, transformOrigin: '50% 50%', duration: 0.18, ease: 'power2.out' })
           .to(eyeRef.current, { scaleY: 1, duration: 0.22, ease: 'power2.out', delay: 0.4 })
       }
+      // 猫式起跳：蓄力下蹲 → 弹起拉伸 → 落地回弹，呼应"猫跳回顶部"；
+      // 到达顶部后按钮按既有逻辑淡出。reduced-motion 跳过
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        gsap
+          .timeline({ defaults: { overwrite: 'auto' } })
+          .to(btn, { scaleY: 0.86, scaleX: 1.06, duration: 0.12, ease: 'power2.out' })
+          .to(btn, { scaleY: 1.1, scaleX: 0.95, y: -12, duration: 0.28, ease: 'power2.out' })
+          .to(btn, { scaleY: 1, scaleX: 1, y: 0, duration: 0.55, ease: 'bounce.out' }, '>-0.08')
+      }
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -174,8 +183,6 @@ export default function BackToTop() {
           <path d="M 58,78 Q 66,88 78,86 Q 82,84 80,79 Q 74,74 66,74 Z" fill={fur} stroke={furEdge} strokeWidth={2} strokeLinejoin="round" />
         </g>
       </svg>
-      {/* 微弱光圈提示 */}
-      <span className="bt-top-ring" aria-hidden />
     </button>
   )
 }
