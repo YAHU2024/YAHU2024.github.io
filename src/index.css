@@ -371,13 +371,24 @@
   touch-action: none; /* 允许徽章内拖拽翻转，阻止页面滚动 */
   will-change: transform;
   z-index: 1;
-  box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.38); /* 减薄后投影相应收敛 */
 }
-/* 拖拽/翻转（含 spin）时关掉本体外投影：box-shadow 画在 z=0 平面，
+/* 悬浮外投影挂在 ::after 上：拖拽/翻转时只过渡 opacity（合成器渲染，零重绘），
+   避免 box-shadow none↔值的瞬时跳变——那正是"变动后阴影突然出现"的突兀感来源 */
+.badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.38);
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+/* 拖拽/翻转（含 spin）淡出外投影：box-shadow 画在 z=0 平面，
    倾斜时会从半透明侧壁后面透出，成为侧壁中部的"黑色阴影层"；
-   悬停微浮（is-moving 但非 is-dragging）不关，保留静止悬浮感 */
-.badge.is-dragging {
-  box-shadow: none;
+   悬停微浮（is-moving 但非 is-dragging）不淡出，保留悬浮感 */
+.badge.is-dragging::after {
+  opacity: 0;
 }
 .badge:active {
   cursor: grabbing;
@@ -404,7 +415,7 @@
   -webkit-backdrop-filter: var(--badge-filter);
 }
 .badge-front {
-  transform: translateZ(14px);
+  transform: translateZ(14px) scale(var(--face-shrink, 1)); /* 圆角倒角：面与侧壁轮廓连续 */
   border: 1px solid var(--gborder); /* 与站点 .glass 同规格 */
   background:
     radial-gradient(120% 120% at 30% 22%, var(--badge-hi), transparent 55%),
@@ -416,7 +427,7 @@
     /* 玻璃导光 */ inset 0 0 30px var(--badge-inset);
 }
 .badge-back {
-  transform: rotateY(180deg) translateZ(14px);
+  transform: rotateY(180deg) translateZ(14px) scale(var(--face-shrink, 1));
   background:
     radial-gradient(120% 120% at 70% 22%, var(--badge-hi), transparent 55%),
     var(--face-base);

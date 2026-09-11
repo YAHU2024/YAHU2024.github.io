@@ -11,6 +11,8 @@ import { useCatMicro } from '@/hooks/useCatMicro'
 // 旧方案（72 段直边薄片绕圆周拼筒）轮廓是 72 边形，Chromium 对 3D 层不做抗锯齿，
 // 正面看边缘有微小锯齿；真圆叠层轮廓 = 原生抗锯齿圆，锯齿从几何上消除。
 const LAYERS = 30 // 层距 = 厚度/LAYERS ≈ 0.93px（基准 340px 下）+ 每层 0.6px 同色描边封缝，翻转时侧壁连续无漏缝
+const FILLET_LAYERS = 7 // 每侧参与圆角倒角的层数（30 层中占 7 层）
+const FILLET_AMT = 0.014 // 表面圆角收缩比（340px 下 ≈ 4.8px），正反面同步缩小保持轮廓连续
 // 以下均为「基准直径 340px」下的取值。窄屏时 .badge 会收缩到容器宽度，
 // 侧壁/装饰按实际直径等比换算（scale = 实测直径 / BASE_D），否则侧壁会飞出圆外。
 const BASE_D = 340
@@ -456,6 +458,7 @@ export default function CatCard({ ref }: CatCardProps) {
       <div
         ref={badgeRef}
         className="badge"
+        style={{ '--face-shrink': (1 - FILLET_AMT).toFixed(4) } as React.CSSProperties}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endFlip}
@@ -465,25 +468,33 @@ export default function CatCard({ ref }: CatCardProps) {
         aria-label={copy.cat.badgeAria}
         onKeyDown={onKeyDown}
       >
-        {/* 真 3D 侧壁 v2：LAYERS 个真圆沿 Z 轴叠出厚度（i=0 背沿 → i=末 前沿）
+        {/* 真 3D 侧壁 v3：LAYERS 个真圆沿 Z 轴叠出厚度（i=0 背沿 → i=末 前沿）
             颜色沿层深连续插值：mid → hi → hi2，无离散色带/对半分色；
+            圆角倒角：每侧 FILLET_LAYERS 层半径按二次缓动收缩（贴近表面收最多），
+            正反面同步 scale(--face-shrink)，面/壁轮廓连续无台阶；
+            倒角区提亮 s·8% 形成受光高光弧；
             层 z 收在 ±(T/2 - step/2) 内，与 ±T/2 的正反面保持半步距，避免共面 z-fighting */}
         {Array.from({ length: LAYERS }, (_, i) => {
           const t = i / (LAYERS - 1) // 0 = 背沿 → 1 = 前沿
-          const c =
+          const c0 =
             t < 0.55
               ? mixColor(palette.mid, palette.hi, t / 0.55)
               : mixColor(palette.hi, palette.hi2, (t - 0.55) / 0.45)
+          // 圆角倒角：dEnd = 距最近表面的层距；倒角区内按二次缓动收缩半径并提亮
+          const dEnd = Math.min(i, LAYERS - 1 - i)
+          const s = dEnd < FILLET_LAYERS ? (1 - dEnd / FILLET_LAYERS) ** 2 : 0
+          const c = mixColor(c0, [255, 255, 255, 1], s * 0.08)
+          const d = edgeD * (1 - FILLET_AMT * s)
           const z = (-edgeT / 2 + (edgeT * (i + 0.5)) / LAYERS).toFixed(2)
           return (
             <span
               key={i}
               className="badge-layer"
               style={{
-                width: `${edgeD}px`,
-                height: `${edgeD}px`,
-                marginLeft: `${-edgeD / 2}px`,
-                marginTop: `${-edgeD / 2}px`,
+                width: `${d}px`,
+                height: `${d}px`,
+                marginLeft: `${-d / 2}px`,
+                marginTop: `${-d / 2}px`,
                 transform: `translateZ(${z}px)`,
                 background: `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3]})`,
                 boxShadow: `0 0 0 0.6px rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3]})`,
