@@ -1,6 +1,5 @@
 import { useRef, type HTMLAttributes, type ReactNode } from 'react'
 import { useTilt } from '@/hooks/useTilt'
-import { useSheen } from '@/hooks/useSheen'
 
 interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
@@ -12,15 +11,13 @@ interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   tilt?: boolean
   /** 最大倾角（度），默认 6 */
   maxTilt?: number
-  /** 启用光标光斑跟随（默认开） */
-  sheen?: boolean
 }
 
 /**
  * 玻璃卡片（灵动交互版）：
- * - 外层 .glass-card：磨砂玻璃视觉 + hover 弹性浮起 + 按压压感 + 光斑层
+ * - 外层 .glass-card：磨砂玻璃视觉 + hover 弹性浮起 + 按压压感
  * - 内层 .glass-card-in：3D 倾斜（JS 驱动）+ 内容深度分层（gc-z1/z2/z3）
- * - 光斑叠加在内容之上（z-index 1，screen 混合），运动期自动关 backdrop-filter
+ * - 运动期自动关 backdrop-filter
  */
 export default function GlassCard({
   children,
@@ -28,18 +25,15 @@ export default function GlassCard({
   innerClassName = 'flex flex-1 flex-col',
   tilt = false,
   maxTilt = 6,
-  sheen = true,
   ...rest
 }: GlassCardProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
 
   useTilt({ root: rootRef, target: innerRef }, { enabled: tilt, maxTilt })
-  useSheen(rootRef, { enabled: sheen })
 
   return (
     <div ref={rootRef} className={`glass-card glass ${className}`} {...rest}>
-      {sheen && <div className="glass-sheen" aria-hidden />}
       <div ref={innerRef} className={`glass-card-in ${innerClassName}`}>
         {children}
       </div>

@@ -139,7 +139,7 @@ function ProjectCard({ p }: { p: ProjectItem }) {
  */
 function PlaceholderCard() {
   return (
-    <GlassCard className="placeholder-card h-full p-7" sheen={false}>
+    <GlassCard className="placeholder-card h-full p-7">
       <span className="frost-layer" aria-hidden />
       <div className="gc-z1 mb-4 flex items-center justify-between gap-3">
         <span

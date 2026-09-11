@@ -647,26 +647,6 @@
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-/* 光斑：光标位置的径向高光，screen 混合叠在内容上 */
-.glass-sheen {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(
-    circle at var(--sx, 50%) var(--sy, 30%),
-    color-mix(in srgb, var(--accent) 55%, transparent),
-    color-mix(in srgb, var(--accent) 38%, transparent) 34%,
-    transparent 60%
-  );
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-.glass-card:hover .glass-sheen {
-  opacity: 1;
-}
 /* 3D 运动层：JS 写入 rotateX/rotateY；preserve-3d 让内部 translateZ 有纵深 */
 .glass-card-in {
   position: relative;
