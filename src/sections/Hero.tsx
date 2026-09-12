@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
-import { ArrowDown, Github } from 'lucide-react'
+import { ArrowDown, ArrowRight } from 'lucide-react'
 import { profile, snapshot } from '@/data/github'
 import { useT, useTL } from '@/hooks/useLocale'
 import type { Copy } from '@/data/copy'
@@ -114,13 +114,8 @@ export default function HeroLeft({ publicRepos, repos }: HeroLeftProps) {
           >
             {t.hero.ctaProjects} <ArrowDown className="ml-1 inline h-4 w-4" />
           </a>
-          <a
-            href={profile.htmlUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-pop glass flex items-center gap-2 rounded-xl px-6 py-3 font-bold"
-          >
-            <Github className="h-4 w-4" /> {t.hero.github}
+          <a href="#recent" className="btn-pop glass flex items-center gap-2 rounded-xl px-6 py-3 font-bold">
+            <ArrowRight className="h-4 w-4" /> {t.hero.recent}
           </a>
         </div>
       </Reveal>

@@ -64,7 +64,8 @@ const zh = {
       none: '—',
     },
     ctaProjects: '看看我的项目',
-    github: 'GitHub',
+    /** Hero 次按钮：进「最近」视图（#recent hash 入口） */
+    recent: '最近',
     /** 「最近」小标签，后跟 src/data/now.ts 的 recent 两行内容 */
   },
   now: {
@@ -177,7 +178,8 @@ const en: Copy = {
       none: '—',
     },
     ctaProjects: 'See my projects',
-    github: 'GitHub',
+    /** Hero 次按钮：进「最近」视图（#recent hash 入口） */
+    recent: 'Recent',
   },
   now: {
     num: '00',
