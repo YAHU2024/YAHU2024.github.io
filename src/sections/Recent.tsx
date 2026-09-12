@@ -1,8 +1,6 @@
 import { now } from '@/data/now'
-import { copy } from '@/data/copy'
+import { useT, useTL } from '@/hooks/useLocale'
 import GlassCard from '@/components/GlassCard'
-
-const { recentPage } = copy
 
 /** '2026-09-04' → '2026.09.04'（sandev 式日期点分格式） */
 function dotDate(iso: string): string {
@@ -17,12 +15,15 @@ function dotDate(iso: string): string {
  * - 带 data-tz 标记的块参与视图切换的模糊渐变转场
  */
 export default function RecentLeft() {
+  const t = useT()
+  const tl = useTL()
+  const { recentPage } = t
   return (
     <div>
       <div data-tz>
         <h1 className="text-[2.3rem] font-black leading-[1.25] tracking-wide md:text-5xl">
-          {recentPage.title.slice(0, -1)}
-          <span className="text-accent">。</span>
+          {recentPage.title}
+          <span className="text-accent">{recentPage.dot}</span>
         </h1>
         <p className="mt-4 text-lg text-muted">{recentPage.desc}</p>
       </div>
@@ -33,12 +34,12 @@ export default function RecentLeft() {
         <span className="h-px flex-1" style={{ background: 'var(--line)' }} aria-hidden />
       </h2>
       <div className="mt-5 space-y-4">
-        {now.timeline.map((t) => (
-          <GlassCard key={t.date} className="p-6" data-tz>
-            <time className="text-xs font-bold text-accent" dateTime={t.date}>
-              {dotDate(t.date)}
+        {now.timeline.map((entry) => (
+          <GlassCard key={entry.date} className="p-6" data-tz>
+            <time className="text-xs font-bold text-accent" dateTime={entry.date}>
+              {dotDate(entry.date)}
             </time>
-            <p className="mt-2 text-[0.95rem] leading-relaxed text-muted">{t.text}</p>
+            <p className="mt-2 text-[0.95rem] leading-relaxed text-muted">{tl(entry.text)}</p>
           </GlassCard>
         ))}
       </div>
@@ -66,12 +67,12 @@ export default function RecentLeft() {
                 className="ml-auto shrink-0 rounded-full border px-3 py-0.5 text-xs font-bold text-muted"
                 style={{ borderColor: 'var(--gborder)' }}
               >
-                {plan.status}
+                {tl(plan.status)}
               </span>
             </div>
-            <h3 className="mt-3 text-base font-extrabold">{plan.title}</h3>
+            <h3 className="mt-3 text-base font-extrabold">{tl(plan.title)}</h3>
             {plan.desc && (
-              <p className="mt-1.5 text-[0.95rem] leading-relaxed text-muted">{plan.desc}</p>
+              <p className="mt-1.5 text-[0.95rem] leading-relaxed text-muted">{tl(plan.desc)}</p>
             )}
             {typeof plan.progress === 'number' && (
               <div className="mt-4">
@@ -82,7 +83,7 @@ export default function RecentLeft() {
                   aria-valuenow={plan.progress}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-label={`${plan.title} ${copy.projects.progress}`}
+                  aria-label={`${tl(plan.title)} ${t.projects.progress}`}
                 >
                   <div
                     className="h-full rounded-full bg-accent"

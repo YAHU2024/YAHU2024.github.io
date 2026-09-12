@@ -1,13 +1,34 @@
 // ─────────────────────────────────────────────────────────────
-// 界面文案集中配置（唯一修改入口）
-// 改字只改这个文件；组件一律引用 copy，不允许出现裸字符串文案。
-// 说明：内容层数据分三个文件，本文件只管界面 UI 文案
+// 界面文案集中配置（唯一修改入口）· 中英双语
+// 改字只改这个文件；组件一律 useT() 取字典，不允许出现裸字符串文案。
+//
+// 结构：zh / en 两棵同构字典树（en 的类型 = typeof zh，少译一条 tsc 直接报错）。
+//   - 新增文案：zh、en 两棵树必须同时写
+//   - 新增语言：加一棵树 + useLocale.ts 的 Locale 联合类型加值
+//   - 函数型文案（相对时间等）：两棵树各写一份同签名函数
+//
+// 说明：内容层数据分三个文件（P2 再做双语 L 字段改造）：
 //   src/data/projects.ts —— 项目（按 doing / shipped / idea 分组）
 //   src/data/now.ts      —— 最近状态（doing / learning / timeline）
 //   src/data/github.ts   —— 个人资料、工具箱、GitHub 快照
 // ─────────────────────────────────────────────────────────────
 
-export const copy = {
+const zh = {
+  lang: {
+    toggleAria: '切换到英文',
+    toggleTitle: '切换到 English',
+  },
+  /** P3：语言切换时同步 document.title 与 meta description */
+  seo: {
+    title: 'YAHU · 把日常做成顺手的软件',
+    description: 'YAHU 的个人网站 — 把日常的小麻烦做成顺手的软件',
+  },
+  theme: {
+    toDark: '切换到深色主题',
+    toLight: '切换到浅色主题',
+    toDarkTitle: '切到夜晚 🌙',
+    toLightTitle: '切到白天 ☀️',
+  },
   nav: {
     brand: 'YAHU',
     brandDot: '.',
@@ -22,7 +43,9 @@ export const copy = {
   },
   /** 「最近」页（#recent 视图）：布局参考 sandev.cc/zh/notes，玻璃卡风格化 */
   recentPage: {
-    title: '最近。',
+    title: '最近',
+    /** 大标题尾部的强调点（zh 全角句号 / en 半角点），与 title 拆开渲染 accent 色 */
+    dot: '。',
     desc: '记录最近在做的事，和一些想法计划。',
     notesTitle: '动态',
     plansTitle: '计划',
@@ -102,6 +125,111 @@ export const copy = {
     avatarAlt: 'YAHU 的头像',
     badgeAria: '猫徽章，按住拖拽可 360° 翻转，松手自动归位',
   },
-} as const
+}
 
-export type Copy = typeof copy
+export type Copy = typeof zh
+
+const en: Copy = {
+  lang: {
+    toggleAria: 'Switch to Chinese',
+    toggleTitle: '切换到中文',
+  },
+  seo: {
+    title: 'YAHU · Turning everyday needs into handy software',
+    description: "YAHU's personal site — small daily annoyances turned into handy software",
+  },
+  theme: {
+    toDark: 'Switch to dark theme',
+    toLight: 'Switch to light theme',
+    toDarkTitle: 'Night mode 🌙',
+    toLightTitle: 'Day mode ☀️',
+  },
+  nav: {
+    brand: 'YAHU',
+    brandDot: '.',
+    home: 'Home',
+    recent: 'Recent',
+    projects: 'Projects',
+    toolbox: 'Toolbox',
+    about: 'About',
+    github: 'GitHub',
+    menuOpen: 'Open menu',
+    menuClose: 'Close menu',
+  },
+  recentPage: {
+    title: 'Recent',
+    dot: '.',
+    desc: "What I've been up to lately, plus some plans and ideas.",
+    notesTitle: 'Updates',
+    plansTitle: 'Plans',
+  },
+  hero: {
+    hello: "👋 Hi, I'm YAHU",
+    statRepos: 'Public repos',
+    statCommits: 'Commits this year',
+    statUpdated: 'Last updated',
+    timeAgo: {
+      today: 'Today',
+      yesterday: 'Yesterday',
+      days: (n: number) => `${n} days ago`,
+      weeks: (n: number) => `${n} week${n > 1 ? 's' : ''} ago`,
+      months: (n: number) => `${n} month${n > 1 ? 's' : ''} ago`,
+      none: '—',
+    },
+    ctaProjects: 'See my projects',
+    github: 'GitHub',
+  },
+  now: {
+    num: '00',
+    title: 'Now',
+    updatedAt: (date: string) => `Last updated ${date}`,
+    doingTitle: 'Doing',
+    learningTitle: 'Learning · Reading',
+    timelineTitle: 'Updates',
+    empty: 'Nothing yet',
+  },
+  projects: {
+    num: '01',
+    title: 'Projects',
+    allOnGitHub: (n: number) => `All ${n} repos on GitHub`,
+    status: {
+      doing: 'In progress',
+      shipped: 'Shipped',
+      idea: 'Idea',
+    },
+    progress: 'Progress',
+    repo: 'Source',
+    site: 'Site',
+    placeholderTitle: 'Reserved',
+    placeholderText: 'This spot is waiting for the next project in this state',
+    groupAria: (label: string, n: number) => `${label}, ${n} project${n > 1 ? 's' : ''} in total`,
+  },
+  toolbox: {
+    num: '02',
+    title: 'Toolbox',
+    subtitle: 'Tools I reach for every day',
+  },
+  about: {
+    num: '03',
+    title: 'About me',
+    text: "I'm **YAHU** — I like turning everyday needs into *handy software*. Get it running first, then polish it until it feels good.",
+  },
+  footer: {
+    brand: 'YAHU',
+    brandDot: '.',
+    live: 'Data live from the GitHub API',
+    offline: (fetchedAt: string) => `Offline snapshot · updated ${fetchedAt}`,
+    liveTitle: 'Live data from the GitHub API',
+    offlineTitle: 'GitHub API unavailable — showing an offline snapshot',
+    copyright: '© 2026 YAHU · made with ☕ and curiosity',
+    github: 'GitHub',
+    email: 'Email',
+  },
+  cat: {
+    avatarAlt: "YAHU's avatar",
+    badgeAria: 'Cat badge — press and drag to spin 360°, release to snap back',
+  },
+}
+
+/** 语言 → 字典树；组件经 src/hooks/useLocale.ts 的 useT() 取用 */
+export const dictionaries = { zh, en }

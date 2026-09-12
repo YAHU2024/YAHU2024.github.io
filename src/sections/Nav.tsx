@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { Github, Menu, X } from 'lucide-react'
 import { profile } from '@/data/github'
-import { copy } from '@/data/copy'
+import { useT } from '@/hooks/useLocale'
 import ThemeToggle from '@/components/ThemeToggle'
+import LangToggle from '@/components/LangToggle'
 
 interface NavProps {
   /** 当前激活锚点（top / recent / projects / toolbox / about），由 Home 的滚动侦测与视图状态驱动 */
@@ -18,6 +19,7 @@ interface NavProps {
  * - 抽屉可访问性：aria-expanded / aria-controls / Esc 关闭 / 点击遮罩关闭
  */
 export default function Nav({ active }: NavProps) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const desktopNavRef = useRef<HTMLElement>(null)
   const pillRef = useRef<HTMLSpanElement>(null)
@@ -38,27 +40,29 @@ export default function Nav({ active }: NavProps) {
   const close = () => setOpen(false)
 
   const navItems = [
-    { href: '#top', label: copy.nav.home },
-    { href: '#recent', label: copy.nav.recent },
-    { href: '#projects', label: copy.nav.projects },
-    { href: '#toolbox', label: copy.nav.toolbox },
-    { href: '#about', label: copy.nav.about },
+    { href: '#top', label: t.nav.home },
+    { href: '#recent', label: t.nav.recent },
+    { href: '#projects', label: t.nav.projects },
+    { href: '#toolbox', label: t.nav.toolbox },
+    { href: '#about', label: t.nav.about },
   ]
 
-  // 胶囊滑动：首次出现直接就位（无动画），此后 active 变化时 0.35s 滑到新项。
-  // overwrite:'auto' 杀掉同属性旧 tween——快速滚动时多个滑行请求不会互相覆盖卡死。
+  // ── 胶囊定位（统一几何出口）──
+  // 读取当前 active 对应链接的几何位置，animate=true 滑动过去，false 原地吸附。
   // 横向 ±6px 呼吸边距，保证胶囊完全罩住文字。
-  useEffect(() => {
+  const positionPill = useCallback((animate: boolean) => {
     const nav = desktopNavRef.current
     const pill = pillRef.current
-    if (!nav || !pill) return
-    const link = nav.querySelector<HTMLAnchorElement>(`a[data-anchor="${active}"]`)
-    if (!link || !nav.offsetParent) return
+    if (!nav || !pill || !nav.offsetParent) return
+    const link = nav.querySelector<HTMLAnchorElement>(`a[data-anchor="${activeRef.current}"]`)
+    if (!link) return
     const target = { x: link.offsetLeft - 6, width: link.offsetWidth + 12 }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prevActive.current === '' || reduce) gsap.set(pill, target)
-    else {
-      // 滑动期间关 blur（backdrop-filter 每帧重采样），滑完恢复真玻璃
+    if (!animate || reduce || prevActive.current === '') {
+      gsap.set(pill, target)
+    } else {
+      // 滑动期间关 blur（backdrop-filter 每帧重采样），滑完恢复真玻璃；
+      // overwrite:'auto' 杀掉同属性旧 tween——快速滚动时多个滑行请求不会互相覆盖卡死
       pill.classList.add('is-moving')
       gsap.to(pill, {
         ...target,
@@ -68,23 +72,25 @@ export default function Nav({ active }: NavProps) {
         onComplete: () => pill.classList.remove('is-moving'),
       })
     }
-    prevActive.current = active
-  }, [active])
-
-  // 断点跨越 / 字体加载导致宽度变化时，无动画重新就位（读 ref 里的当前 active，不随其重跑）
-  useEffect(() => {
-    const reposition = () => {
-      const nav = desktopNavRef.current
-      const pill = pillRef.current
-      if (!nav || !pill || !nav.offsetParent) return
-      const link = nav.querySelector<HTMLAnchorElement>(`a[data-anchor="${activeRef.current}"]`)
-      if (!link) return
-      gsap.set(pill, { x: link.offsetLeft - 6, width: link.offsetWidth + 12 })
-    }
-    window.addEventListener('resize', reposition)
-    document.fonts?.ready.then(reposition).catch(() => {})
-    return () => window.removeEventListener('resize', reposition)
+    prevActive.current = activeRef.current
   }, [])
+
+  // active 变化 → 滑动到新项；首次挂载直接就位（无动画）
+  useEffect(() => {
+    positionPill(true)
+  }, [active, positionPill])
+
+  // 任何导航链接宽度变化（语言切换 / 文案修改 / 字体加载 / 系统缩放 / 断点跨越）
+  // → 无动画原地重新就位。观察链接本体而非监听 resize 事件：与宽度变化的成因彻底解耦，
+  //   内容换语言这类「事件型监听覆盖不到」的变更也能被捕获；胶囊定位不改变链接尺寸，无回环风险。
+  useEffect(() => {
+    const nav = desktopNavRef.current
+    if (!nav) return
+    const ro = new ResizeObserver(() => positionPill(false))
+    ro.observe(nav)
+    nav.querySelectorAll('a[data-anchor]').forEach((el) => ro.observe(el))
+    return () => ro.disconnect()
+  }, [positionPill])
 
   return (
     <header
@@ -93,8 +99,8 @@ export default function Nav({ active }: NavProps) {
     >
       <div className="relative mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <a href="#top" className="text-xl font-extrabold tracking-wide">
-          {copy.nav.brand}
-          <span className="text-accent">{copy.nav.brandDot}</span>
+          {t.nav.brand}
+          <span className="text-accent">{t.nav.brandDot}</span>
         </a>
 
         <div className="flex items-center gap-4 sm:gap-6">
@@ -121,6 +127,8 @@ export default function Nav({ active }: NavProps) {
             })}
           </nav>
 
+          <LangToggle />
+
           <ThemeToggle />
 
           <a
@@ -130,7 +138,7 @@ export default function Nav({ active }: NavProps) {
             className="btn-pop btn-accent-glass hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-[var(--accent-ink)] sm:flex"
           >
             <Github className="h-4 w-4" />
-            {copy.nav.github}
+            {t.nav.github}
           </a>
 
           {/* 移动端菜单按钮 */}
@@ -139,7 +147,7 @@ export default function Nav({ active }: NavProps) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="mobile-nav"
-            aria-label={open ? copy.nav.menuClose : copy.nav.menuOpen}
+            aria-label={open ? t.nav.menuClose : t.nav.menuOpen}
             className="btn-pop -mr-2 flex h-9 w-9 items-center justify-center rounded-lg text-foreground sm:hidden"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -158,7 +166,7 @@ export default function Nav({ active }: NavProps) {
           />
           <nav
             id="mobile-nav"
-            aria-label={copy.nav.menuOpen}
+            aria-label={t.nav.menuOpen}
             className="menu-in absolute top-full right-4 z-50 w-64 sm:hidden"
           >
             <div className="pt-2">
@@ -195,7 +203,7 @@ export default function Nav({ active }: NavProps) {
                   className="btn-accent-glass flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold"
                 >
                   <Github className="h-4 w-4" />
-                  {copy.nav.github}
+                  {t.nav.github}
                 </a>
               </div>
             </div>

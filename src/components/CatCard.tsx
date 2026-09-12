@@ -2,7 +2,7 @@ import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } fro
 import type { PointerEvent as RPointerEvent, KeyboardEvent as RKeyboardEvent, Ref } from 'react'
 import gsap from 'gsap'
 import { profile } from '@/data/github'
-import { copy } from '@/data/copy'
+import { useT } from '@/hooks/useLocale'
 import { useTheme } from '@/hooks/useTheme'
 import CatFace from '@/components/CatFace'
 import { useCatMicro } from '@/hooks/useCatMicro'
@@ -80,6 +80,7 @@ interface CatCardProps {
 }
 
 export default function CatCard({ ref }: CatCardProps) {
+  const t = useT()
   const [theme] = useTheme()
   /** 亚克力色板随主题切换 */
   const palette = ACRYLIC[theme === 'dark' ? 'dark' : 'light']
@@ -465,7 +466,7 @@ export default function CatCard({ ref }: CatCardProps) {
         onPointerCancel={endFlip}
         tabIndex={0}
         role="button"
-        aria-label={copy.cat.badgeAria}
+        aria-label={t.cat.badgeAria}
         onKeyDown={onKeyDown}
       >
         {/* 真 3D 侧壁 v3：LAYERS 个真圆沿 Z 轴叠出厚度（i=0 背沿 → i=末 前沿）
@@ -518,7 +519,7 @@ export default function CatCard({ ref }: CatCardProps) {
           <img
             className="badge-back-ava"
             src={profile.avatarUrl}
-            alt={copy.cat.avatarAlt}
+            alt={t.cat.avatarAlt}
             draggable={false}
           />
         </div>

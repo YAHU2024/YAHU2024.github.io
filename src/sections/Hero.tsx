@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ArrowDown, Github } from 'lucide-react'
 import { profile, snapshot } from '@/data/github'
-import { copy } from '@/data/copy'
+import { useT, useTL } from '@/hooks/useLocale'
+import type { Copy } from '@/data/copy'
 import CountUp from '@/components/CountUp'
 import Reveal from '@/components/Reveal'
 
@@ -22,8 +23,7 @@ function latestUpdatedDays(repos: { updatedAt: string | null }[]): number | null
 }
 
 /** 人性化的相对时间：0→今天、1→昨天、一周内→N 天前、一月内→N 周前、更久→N 个月前 */
-function formatLatestUpdated(days: number | null): string {
-  const { timeAgo } = copy.hero
+function formatLatestUpdated(days: number | null, timeAgo: Copy['hero']['timeAgo']): string {
   if (days === null) return timeAgo.none
   if (days === 0) return timeAgo.today
   if (days === 1) return timeAgo.yesterday
@@ -38,6 +38,8 @@ function formatLatestUpdated(days: number | null): string {
  * - 「最近」单行已迁至独立页（Recent.tsx），这里不再展示
  */
 export default function HeroLeft({ publicRepos, repos }: HeroLeftProps) {
+  const t = useT()
+  const tl = useTL()
   const line1Ref = useRef<HTMLSpanElement>(null)
   const line2Ref = useRef<HTMLSpanElement>(null)
   const days = latestUpdatedDays(repos)
@@ -65,42 +67,42 @@ export default function HeroLeft({ publicRepos, repos }: HeroLeftProps) {
     <div>
       <Reveal data-tz>
         <span className="glass inline-block rounded-full px-4 py-1.5 text-sm font-bold">
-          {copy.hero.hello}
+          {t.hero.hello}
         </span>
       </Reveal>
       <h1 className="mt-6 text-[2.3rem] font-black leading-[1.25] tracking-wide md:text-5xl">
         <span ref={line1Ref} className="block">
-          {profile.headline.line1}
+          {tl(profile.headline.line1)}
         </span>
         <span ref={line2Ref} className="block">
-          {profile.headline.line2Pre}
+          {tl(profile.headline.line2Pre)}
           <span className="text-accent" style={{ textShadow: 'var(--accent-glow)' }}>
-            {profile.headline.accent}
+            {tl(profile.headline.accent)}
           </span>
-          {profile.headline.line2Post}
+          {tl(profile.headline.line2Post)}
         </span>
       </h1>
       <Reveal delay={120} data-tz>
         <p className="mt-5 text-lg text-muted">
-          <b className="font-bold text-foreground">{profile.tagline}</b>
+          <b className="font-bold text-foreground">{tl(profile.tagline)}</b>
         </p>
       </Reveal>
       <Reveal delay={200} data-tz>
         <div className="mt-8 flex flex-wrap items-center">
           <div className="py-1 pr-7">
             <CountUp value={publicRepos} className="text-2xl font-extrabold" />
-            <div className="mt-0.5 text-xs font-semibold text-muted">{copy.hero.statRepos}</div>
+            <div className="mt-0.5 text-xs font-semibold text-muted">{t.hero.statRepos}</div>
           </div>
           <div className="border-l py-1 pl-7 pr-7" style={{ borderColor: 'var(--line)' }}>
             <CountUp
               value={snapshot.contributionsLastYear}
               className="text-2xl font-extrabold"
             />
-            <div className="mt-0.5 text-xs font-semibold text-muted">{copy.hero.statCommits}</div>
+            <div className="mt-0.5 text-xs font-semibold text-muted">{t.hero.statCommits}</div>
           </div>
           <div className="border-l py-1 pl-7" style={{ borderColor: 'var(--line)' }}>
-            <div className="text-2xl font-extrabold">{formatLatestUpdated(days)}</div>
-            <div className="mt-0.5 text-xs font-semibold text-muted">{copy.hero.statUpdated}</div>
+            <div className="text-2xl font-extrabold">{formatLatestUpdated(days, t.hero.timeAgo)}</div>
+            <div className="mt-0.5 text-xs font-semibold text-muted">{t.hero.statUpdated}</div>
           </div>
         </div>
       </Reveal>
@@ -110,7 +112,7 @@ export default function HeroLeft({ publicRepos, repos }: HeroLeftProps) {
             href="#projects"
             className="btn-pop btn-accent-glass rounded-xl px-6 py-3 font-bold"
           >
-            {copy.hero.ctaProjects} <ArrowDown className="ml-1 inline h-4 w-4" />
+            {t.hero.ctaProjects} <ArrowDown className="ml-1 inline h-4 w-4" />
           </a>
           <a
             href={profile.htmlUrl}
@@ -118,7 +120,7 @@ export default function HeroLeft({ publicRepos, repos }: HeroLeftProps) {
             rel="noreferrer"
             className="btn-pop glass flex items-center gap-2 rounded-xl px-6 py-3 font-bold"
           >
-            <Github className="h-4 w-4" /> {copy.hero.github}
+            <Github className="h-4 w-4" /> {t.hero.github}
           </a>
         </div>
       </Reveal>
