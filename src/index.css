@@ -780,6 +780,23 @@
 .btn-pop:active {
   transform: scale(0.96);
 }
+/* ── 顶栏开关按钮（主题/语言）：btn-pop 同族动效，但保留 .glass 的配色过渡 ──
+   不能直接套 .btn-pop：transition 属性会整体覆盖 .glass 的 background/border
+   0.45s 主题切换渐变。这里把 transform / color / glass 色三类过渡合并声明，
+   悬停语义与全站按钮统一（上浮 + 按压），文字色变化也走缓动 */
+.toggle-pop {
+  transition:
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    color 0.28s ease,
+    background-color 0.45s ease,
+    border-color 0.45s ease;
+}
+.toggle-pop:hover {
+  transform: translateY(-2px);
+}
+.toggle-pop:active {
+  transform: scale(0.94);
+}
 /* ── 彩色玻璃按钮（主 CTA）：accent 72% 半透底 + 顶部 sheen + blur + accent 描边 ──
    替代纯色 bg-accent：保持 accent-ink 文字对比（与原实色按钮同族明度），
    玻璃感来自 blur / 内高光 / 描边。transition 含 transform 以兼容 .btn-pop 的 hover 上浮 */
