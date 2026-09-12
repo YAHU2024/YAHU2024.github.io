@@ -797,6 +797,45 @@
 .toggle-pop:active {
   transform: scale(0.94);
 }
+/* ── 主题切换过渡（两层渐进增强，驱动方在 ThemeToggle）──
+   1) 兜底：切换后短窗口内给 <html> 挂 .theme-transitioning，全站颜色属性走
+      0.45s 渐变，结束即摘——常挂会让 hover 态也被过渡拖慢，故只在切换窗口生效
+   2) 增强：支持 View Transitions 的浏览器走圆形扩散擦除（JS 按 clip-path 驱动），
+      这里只需关掉 VT 默认的交叉淡化（animation: none） */
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition:
+    background-color 0.45s ease,
+    color 0.45s ease,
+    border-color 0.45s ease,
+    fill 0.45s ease,
+    stroke 0.45s ease !important;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* 收缩向（入夜）：旧画面（白天）提到新画面之上，JS 驱动它缩进按钮圆心，
+   四周先行露出夜间新主题。扩散向（天亮）不需要层序调整（默认新在上，直接扩 clip-path）。
+   data-vt 由 ThemeToggle 在启动 VT 前写入、结束后清除 */
+html[data-vt='shrink']::view-transition-old(root) {
+  z-index: 2;
+}
+html[data-vt='shrink']::view-transition-new(root) {
+  z-index: 1;
+}
+/* 快照冻结：.glass 等自带 0.45s 配色渐变的元素，会让「新画面快照」抓到过渡起点
+   （旧配色）——快照撤除时玻璃面集体跳到终色，就是切换结束后的「闪一下」。
+   VT 窗口期内给 <html> 挂此类，把所有 CSS 过渡压成瞬时，保证新快照 = 终态配色，
+   快照与实时 DOM 零差异；窗口结束（vt.finished）即摘除 */
+html.theme-vt-freeze *,
+html.theme-vt-freeze *::before,
+html.theme-vt-freeze *::after {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
 /* ── 彩色玻璃按钮（主 CTA）：accent 72% 半透底 + 顶部 sheen + blur + accent 描边 ──
    替代纯色 bg-accent：保持 accent-ink 文字对比（与原实色按钮同族明度），
    玻璃感来自 blur / 内高光 / 描边。transition 含 transform 以兼容 .btn-pop 的 hover 上浮 */
