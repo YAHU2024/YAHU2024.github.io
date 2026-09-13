@@ -527,6 +527,37 @@
   }
 }
 
+/* ============================================================
+   移动端（触屏）全局性能降级：整页卡顿 + hero 文字闪烁根治
+   根因链（2026-09-13 排查）：
+   1) .blob::before 双色交叉动画每帧改变滤镜输入 → 4 层 blur(90px)
+      光斑的 90px 大半径模糊每帧重跑（永久持续重绘源）；
+   2) 其上所有 .glass（backdrop blur 18px：导航/hero 徽标/按钮/项目卡）
+      悬浮在持续游动的光斑上 → 每帧重采样背景模糊；
+   3) 合成层持续失效重建 → 整页卡顿 + 文字所在层闪烁。
+   触屏端逐项冻结/降级，桌面不动：
+   ============================================================ */
+@media (hover: none) {
+  /* 1) 冻结光斑双色交叉：滤镜输出变静态，90px blur 只光栅化一次；
+        光斑游动保留（纯合成器 transform 位移动画，零重绘） */
+  .blob::before {
+    animation: none;
+  }
+  /* 2) 光斑不再常驻提升图层：位移动画本身已促成合成，will-change 纯耗显存 */
+  .blob,
+  .blob-par {
+    will-change: auto;
+  }
+  /* 3) 玻璃降级为不透明纯色：消灭滚动/光斑移动期的逐帧 backdrop 重采样，
+        同时规避移动端 backdrop 方形采样伪影；
+        代价是失去毛玻璃通透感（触屏端可接受的取舍） */
+  .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--glass-solid);
+  }
+}
+
 /* 真 3D 侧壁：72 段拼成亚克力筒
    尺寸（width/height/margin）与颜色均由 JS 内联注入：
    颜色需按角度周向打光，且不能用 filter（会 flatten 掉 preserve-3d） */
