@@ -493,6 +493,40 @@
   -webkit-backdrop-filter: none;
 }
 
+/* 移动端（触屏设备）专项修复：
+   - will-change 触发图层提升后，移动 WebKit 会把 preserve-3d 子树拍扁
+     （实测：42 层侧壁塌缩成灰饼盖住猫脸）→ 触屏上移除，桌面保留；
+   - backdrop-filter 在移动端 3D 语境下采样区域不遵循 border-radius，
+     会渲染成方形色块，且滚动时每帧重采样 → 强制关闭；
+   - GPU 图层内存有限，合成层数在 CatCard.tsx 的 isTouch 分支降为 16 层 */
+@media (hover: none) {
+  .badge {
+    will-change: auto;
+  }
+  .badge-face {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* 老 WebView（不支持 aspect-ratio）高度塌陷兜底：
+   用 padding-top 百分比撑出正方形行，徽章同格铺满；
+   支持 aspect-ratio 的浏览器不走此分支，行为零变化 */
+@supports not (aspect-ratio: 1) {
+  .cat-stage {
+    display: grid;
+  }
+  .cat-stage::before {
+    content: '';
+    grid-area: 1 / 1;
+    padding-top: 100%;
+  }
+  .badge {
+    grid-area: 1 / 1;
+    height: 100%;
+  }
+}
+
 /* 真 3D 侧壁：72 段拼成亚克力筒
    尺寸（width/height/margin）与颜色均由 JS 内联注入：
    颜色需按角度周向打光，且不能用 filter（会 flatten 掉 preserve-3d） */
@@ -502,7 +536,7 @@
   top: 50%;
   border-radius: 50%;
   /* 不要加 will-change：侧壁是静态的（只有父级 .badge 在转），
-     20 层真圆远少于旧 72 段薄片，合成压力同步下降 */
+     层数自适应（桌面 42 / 触屏 16，见 CatCard.tsx），合成压力已控制在移动端预算内 */
   pointer-events: none;
 }
 /* 接触投影：撑起重量感（z-index 0，位于徽章 z-index 1 之下） */

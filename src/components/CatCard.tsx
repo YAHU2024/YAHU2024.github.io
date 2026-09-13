@@ -10,8 +10,14 @@ import { useCatMicro } from '@/hooks/useCatMicro'
 // 真 3D 侧壁 v2：N 个真圆沿 Z 轴阶梯叠出厚度。
 // 旧方案（72 段直边薄片绕圆周拼筒）轮廓是 72 边形，Chromium 对 3D 层不做抗锯齿，
 // 正面看边缘有微小锯齿；真圆叠层轮廓 = 原生抗锯齿圆，锯齿从几何上消除。
-const LAYERS = 42 // 层距 = 厚度/LAYERS ≈ 0.65px（基准 340px 下）+ 每层 1.1px 同色描边封缝，翻转时侧壁连续无漏缝
-const FILLET_LAYERS = 9 // 每侧参与圆角倒角的层数（42 层中占 9 层，随层数等比扩）
+// 移动端（触屏）降层：42 层真圆在移动 GPU 上合成层纹理超限，
+// 实测表现为滚动到徽章即卡顿、侧壁/猫脸被合成器丢弃只剩塌缩灰饼；
+// 16 层纹理占用约 1/3，层距 28/16 = 1.75px（桌面 0.65px），侧壁视觉几乎无差。
+const isTouch =
+  typeof window !== 'undefined' &&
+  window.matchMedia('(hover: none)').matches
+const LAYERS = isTouch ? 16 : 42
+const FILLET_LAYERS = isTouch ? 4 : 9 // 每侧倒角层数占比保持 ~21%，随层数等比缩
 const FILLET_AMT = 0.018 // 表面圆角收缩比（抵消 1.1px 描边外扩，正面直径不变），正反面同步缩小保持轮廓连续
 // 以下均为「基准直径 340px」下的取值。窄屏时 .badge 会收缩到容器宽度，
 // 侧壁/装饰按实际直径等比换算（scale = 实测直径 / BASE_D），否则侧壁会飞出圆外。
