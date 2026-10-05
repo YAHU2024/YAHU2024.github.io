@@ -498,8 +498,11 @@
      （实测：42 层侧壁塌缩成灰饼盖住猫脸）→ 触屏上移除，桌面保留；
    - backdrop-filter 在移动端 3D 语境下采样区域不遵循 border-radius，
      会渲染成方形色块，且滚动时每帧重采样 → 强制关闭；
-   - GPU 图层内存有限，合成层数在 CatCard.tsx 的 isTouch 分支降为 16 层 */
-@media (hover: none) {
+   - GPU 图层内存有限，合成层数在 CatCard.tsx 的 isTouch 分支降为 16 层；
+   - 判定追加 pointer:coarse：vivo 浏览器等定制内核触屏下不上报 hover:none
+     （实测其玻璃纯色降级不生效、徽章跑 42 层触发塌缩 bug），
+     pointer:coarse 由系统触屏硬件上报，不受内核怪癖影响 */
+@media (hover: none), (pointer: coarse) {
   .badge {
     will-change: auto;
   }
@@ -537,7 +540,7 @@
    3) 合成层持续失效重建 → 整页卡顿 + 文字所在层闪烁。
    触屏端逐项冻结/降级，桌面不动：
    ============================================================ */
-@media (hover: none) {
+@media (hover: none), (pointer: coarse) {
   /* 1) 冻结光斑双色交叉：滤镜输出变静态，90px blur 只光栅化一次；
         光斑游动保留（纯合成器 transform 位移动画，零重绘） */
   .blob::before {

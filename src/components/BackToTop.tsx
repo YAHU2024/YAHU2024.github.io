@@ -96,7 +96,12 @@ export default function BackToTop() {
     const paw = pawRef.current
     const eyes = eyeRef.current
     if (!btn || !paw || !eyes) return
-    if (window.matchMedia('(hover: none)').matches) return
+    // 触屏关闭悬停动效；追加 pointer:coarse 兜底 vivo 等不上报 hover:none 的定制内核
+    if (
+      window.matchMedia('(hover: none)').matches ||
+      window.matchMedia('(pointer: coarse)').matches
+    )
+      return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const onEnter = () => {

@@ -13,9 +13,14 @@ import { useCatMicro } from '@/hooks/useCatMicro'
 // 移动端（触屏）降层：42 层真圆在移动 GPU 上合成层纹理超限，
 // 实测表现为滚动到徽章即卡顿、侧壁/猫脸被合成器丢弃只剩塌缩灰饼；
 // 16 层纹理占用约 1/3，层距 28/16 = 1.75px（桌面 0.65px），侧壁视觉几乎无差。
+// 判定不能只靠 hover:none：vivo 浏览器等定制内核在触屏下不上报 hover:none
+// （实测该浏览器 .glass 纯色降级不生效、徽章跑 42 层触发原 bug），
+// 追加 pointer:coarse 兜底——它由系统触屏硬件上报，不受浏览器模式/内核怪癖影响；
+// 桌面触屏笔记本主指针是鼠标（pointer:fine），不会被误降级。
 const isTouch =
   typeof window !== 'undefined' &&
-  window.matchMedia('(hover: none)').matches
+  (window.matchMedia('(hover: none)').matches ||
+    window.matchMedia('(pointer: coarse)').matches)
 const LAYERS = isTouch ? 16 : 42
 const FILLET_LAYERS = isTouch ? 4 : 9 // 每侧倒角层数占比保持 ~21%，随层数等比缩
 const FILLET_AMT = 0.018 // 表面圆角收缩比（抵消 1.1px 描边外扩，正面直径不变），正反面同步缩小保持轮廓连续
@@ -143,7 +148,7 @@ export default function CatCard({ ref }: CatCardProps) {
     const stage = stageRef.current
     const badge = badgeRef.current
     if (!stage || !badge) return
-    if (reducedMotion() || window.matchMedia('(hover: none)').matches) return
+    if (reducedMotion() || isTouch) return
 
     const ctx = gsap.context(() => {
       // 微浮改为「悬停才启动」：静止时徽章完全不动，backdrop-filter 结果可被缓存；
