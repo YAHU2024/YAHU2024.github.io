@@ -38,8 +38,8 @@ export const profile = {
     line2Post: { zh: '。', en: '.' } as L,
   },
   tagline: {
-    zh: '开发 AI 时代的个人工具 · vibe coding 实践者',
-    en: 'Building personal tools for the AI era · vibe coding practitioner',
+    zh: '有意思的想法落地现实 · vibe coding 实践者',
+    en: 'Turn interesting ideas into reality · vibe coding practitioner',
   } as L,
   /** 已不在 Hero 展示：那个位置换成了「最近」标签 + src/data/now.ts 的 recent（暂未上界面，不参与双语） */
   subtitle: '喜欢把一个想法从"跑起来"打磨到"用得舒服"。',

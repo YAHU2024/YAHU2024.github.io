@@ -39,17 +39,17 @@ export const now = {
   /** 最近动态（新→旧），「最近」页日期流数据源 */
   timeline: [
     {
-      date: '2026-09-09',
+      date: '2026-10-06',
       text: {
-        zh: '作品站新增「最近」页：动态日期流 + 计划清单，猫徽章转场整圈翻转',
-        en: 'Portfolio site: new Recent page with updates feed and plans list; full-spin cat badge transition',
+        zh: '优化作品站移动端性能',
+        en: 'Portfolio site: improved mobile performance',
       },
     },
     {
-      date: '2026-09-04',
+      date: '2026-10-04',
       text: {
-        zh: '作品站字体改为自托管，补上社交分享图',
-        en: 'Portfolio site: fonts switched to self-hosting, plus a new social share image',
+        zh: '调研 UNARCHIVE 前端重构方案',
+        en: 'Researching the frontend refactoring plan for UNARCHIVE',
       },
     },
     {
