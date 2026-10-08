@@ -10,6 +10,9 @@
     <!-- 浏览器 UI 着色：跟随站点明暗两套底色 -->
     <meta name="theme-color" content="#0a0e1a" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#fbf9f4" media="(prefers-color-scheme: light)" />
+    <!-- 声明页面只提供 light 配色方案，退出 vivo/微信等浏览器的「强制暗化」整页反色
+         （站点自身暗色主题由 data-theme + CSS 变量驱动，与此声明无关） -->
+    <meta name="color-scheme" content="only light" />
     <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
 
     <!-- 首屏字体提前发起请求：CSS 里的 @font-face 要等 CSS 到手才发现字体，晚一个 RTT -->
@@ -45,7 +48,8 @@
             t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
           }
           document.documentElement.dataset.theme = t
-          document.documentElement.style.colorScheme = t
+          // 不再写 style.colorScheme：配合 <meta name="color-scheme" content="only light">
+          // 退出浏览器强制暗化；写回 dark 会让 vivo/微信重新触发整页反色
         } catch (e) {}
       })()
     </script>

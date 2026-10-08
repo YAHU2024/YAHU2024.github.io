@@ -10,7 +10,9 @@ const FADE_MS = 450
 
 /** 明暗主题开关：跟随系统为默认，手动选择存 localStorage。
     切换过渡分两层（渐进增强），且带方向语义：
-    - 支持 View Transitions：入夜=旧画面（白天）缩进按钮（收缩）；天亮=新画面从按钮涌出（扩散）
+    - 支持 View Transitions 且非触屏：入夜=旧画面（白天）缩进按钮（收缩）；天亮=新画面从按钮涌出（扩散）
+    - 触屏（hover:none / pointer:coarse）：跳过 VT——移动内核对整页快照支持参差，
+      滚动容器下快照易错位，直接走兜底翻牌
     - 不支持：图标拨杆翻转 + 中点切状态，同时挂 .theme-transitioning 让全站颜色渐变
     - prefers-reduced-motion：一律瞬时切换，不演动画 */
 export default function ThemeToggle() {
@@ -38,10 +40,14 @@ export default function ThemeToggle() {
       return
     }
     const doc = document
+    // 触屏判定：hover:none（无悬停能力）或 pointer:coarse（粗指针）任一命中即视为触屏
+    const isTouch =
+      window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches
 
     // 增强层：VT 圆形扩散。快照期间页面视觉静止，GSAP 图标翻转会被藏住，故跳过。
     // 方向语义：入夜=旧画面（白天）缩进按钮（收缩）；天亮=新画面（白天）从按钮涌出（扩散）
-    if (doc.startViewTransition) {
+    // 触屏设备跳过：移动内核整页快照易错位，直接落兜底层
+    if (doc.startViewTransition && !isTouch) {
       const shrink = next === 'dark'
       const root = document.documentElement
       if (shrink) root.dataset.vt = 'shrink'

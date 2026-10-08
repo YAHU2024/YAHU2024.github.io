@@ -859,8 +859,12 @@
     background-color 0.45s ease,
     border-color 0.45s ease;
 }
-.toggle-pop:hover {
-  transform: translateY(-2px);
+/* 悬停上浮仅在真正支持 hover 的设备生效：触屏浏览器 tap 会留下粘滞 hover，
+   按钮卡在上浮位错位；:active 按压反馈保留给触屏 */
+@media (hover: hover) {
+  .toggle-pop:hover {
+    transform: translateY(-2px);
+  }
 }
 .toggle-pop:active {
   transform: scale(0.94);
@@ -878,7 +882,8 @@
     color 0.45s ease,
     border-color 0.45s ease,
     fill 0.45s ease,
-    stroke 0.45s ease !important;
+    stroke 0.45s ease,
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 ::view-transition-old(root),
 ::view-transition-new(root) {

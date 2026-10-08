@@ -11,7 +11,8 @@ function storedTheme(): Theme | null {
 
 function apply(theme: Theme) {
   document.documentElement.dataset.theme = theme
-  document.documentElement.style.colorScheme = theme
+  // 不写 style.colorScheme：页面已通过 <meta name="color-scheme" content="only light">
+  // 退出浏览器强制暗化；此处写回会覆盖 meta 并重新触发 vivo/微信整页反色
 }
 
 // ── 模块级小商店：多个组件（Nav 开关、猫卡）共享同一主题状态 ──
