@@ -197,7 +197,7 @@ export class BadgeRenderer {
       'u_rot', 'u_radius', 'u_z', 'u_d', 'u_half', 'u_mode', 'u_color',
       'u_base', 'u_hi', 'u_hiC', 'u_border', 'u_glowIn', 'u_accent', 'u_inset',
       'u_px', 'u_bowl', 'u_tex', 'u_faceTex', 'u_earTex', 'u_closed',
-      'u_gazeL', 'u_gazeR', 'u_earBlend', 'u_pupilBlend', 'u_faceRot', 'u_faceTilt', 'u_fur', 'u_furEdge', 'u_pupilCol',
+      'u_gazeL', 'u_gazeR', 'u_earBlend', 'u_pupilBlend', 'u_faceRot', 'u_faceTilt', 'u_fur', 'u_furEdge', 'u_pupilCol', 'u_cosRy', 'u_light', 'u_bowlShA',
     ]) {
       this.loc[name] = gl.getUniformLocation(program, name)
     }
@@ -370,6 +370,23 @@ export class BadgeRenderer {
     this.ry = ry
   }
 
+  private lightAng = 2.19 // 光源角 rad（世界系；默认左上，组件按现实时间更新）
+  private lightK = 1 // 光源强度（日 1 / 夜 0.35）
+  private bowlShA = 0.15 // 碗面内凹阴影强度（浅 0.15 / 暗 0.34）
+
+  /** 日光轨：光源角 + 强度（组件每分钟按现实时间刷新，晨昏平滑过渡） */
+  setLight(ang: number, k: number) {
+    this.lightAng = ang
+    this.lightK = k
+    this.draw()
+  }
+
+  /** 碗面内凹阴影强度（随主题：浅 0.15 / 暗 0.34） */
+  setBowlShadow(a: number) {
+    this.bowlShA = a
+    this.draw()
+  }
+
   /** 矩阵 M = Rx·Ry（列向量先 Ry 后 Rx），column-major；M22 = cx·cy 用于深度排序 */
   private rotMat(): Float32Array {
     const ax = (this.rx * Math.PI) / 180
@@ -397,6 +414,9 @@ export class BadgeRenderer {
     gl.useProgram(this.program)
 
     gl.uniformMatrix3fv(this.loc.u_rot!, false, m)
+    gl.uniform1f(this.loc.u_cosRy!, Math.cos((this.ry * Math.PI) / 180))
+    gl.uniform2f(this.loc.u_light!, this.lightAng, this.lightK)
+    gl.uniform1f(this.loc.u_bowlShA!, this.bowlShA)
     gl.uniform1f(this.loc.u_d!, PERSPECTIVE_D)
     gl.uniform1f(this.loc.u_half!, half)
     gl.uniform4f(this.loc.u_base!, ...norm(f.base))

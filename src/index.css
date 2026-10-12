@@ -27,6 +27,7 @@
 :root {
   /* 浅色 · 晨雾奶油 */
   --bg: #fbf9f4;
+  --bowl-bg: var(--bg); /* 猫徽章碗底 = 页面底色 */
   --ink: #2a2a33;
   --muted-text: #54545f;
   --accent: #f0653c;
@@ -95,6 +96,7 @@
 [data-theme='dark'] {
   /* 深色 · 午夜极光 */
   --bg: #0a0e1a;
+  --bowl-bg: #1d2640; /* 猫徽章碗底提亮（夜光表盘）：黑猫剪影 #1a1f2e 需与碗底拉开明度 */
   --ink: #f1f5fb;
   --muted-text: #b9c4d8;
   --accent: #7dd3fc;

@@ -233,6 +233,13 @@ function CatBadge3D({
   const rafRef = useRef(0)
   const spinTl = useRef<gsap.core.Timeline | null>(null)
   const floatRef = useRef<gsap.core.Tween | null>(null)
+  /**
+   * 闭眼值跨主题切换持久（对比微表情 state 的每轮重建）：主题 effect 重跑时
+   * gsap 从当前实际闭眼度渐变到新基线——否则 state 重建瞬间跳变，眼皮"瞬开瞬闭"。
+   * closedInit 标记首挂载（直接落位，避免暗色刷新时先睁眼再渐眯的闪烁）。
+   */
+  const closedState = useRef({ v: 0 })
+  const closedInit = useRef(true)
   /** 拖拽/翻转中：冻结眨眼调度与视线跟随 */
   const microPausedRef = useRef(false)
   /**
@@ -275,7 +282,9 @@ function CatBadge3D({
   const applyFaceFrames = useCallback(() => {
     const svg = faceHostRef.current?.querySelector('svg')
     if (!(svg instanceof SVGSVGElement)) return
-    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff'
+    // 碗底色走 --bowl-bg（暗色主题提亮为夜光表盘 #1d2640，浅色 = 页面底色）
+    const cs2 = getComputedStyle(document.documentElement)
+    const bg = cs2.getPropertyValue('--bowl-bg').trim() || cs2.getPropertyValue('--bg').trim() || '#ffffff'
     const earL = CAT_GEO.ear.left.origin
     const earR = CAT_GEO.ear.right.origin
     const mutateEar = (side: 'left' | 'right', deg: number) => (clone: SVGSVGElement) => {
@@ -311,6 +320,7 @@ function CatBadge3D({
     const pal = PALETTE[themeRef.current]
     r.setFurColors(pal.fur, pal.furEdge)
     r.setPupilColor(pal.pupil)
+    r.setBowlShadow(themeRef.current === 'dark' ? 0.34 : 0.15)
     r.setAvatarUrl(profile.avatarUrl)
     r.setSidePalette(buildLayers(themeRef.current === 'dark' ? ACRYLIC.dark : ACRYLIC.light))
     r.setFaceColors(readFaceColors())
@@ -348,6 +358,7 @@ function CatBadge3D({
       r.setSidePalette(buildLayers(palTo))
       r.setFurColors(PALETTE[theme].fur, PALETTE[theme].furEdge)
       r.setPupilColor(PALETTE[theme].pupil)
+      r.setBowlShadow(theme === 'dark' ? 0.34 : 0.15)
       r.draw()
       applyFaceFrames()
       return
@@ -367,8 +378,32 @@ function CatBadge3D({
     // 眼睑色/瞳孔色与猫脸变体帧随主题更新（SVG 已由 React 提交为新色板）
     r.setFurColors(PALETTE[theme].fur, PALETTE[theme].furEdge)
     r.setPupilColor(PALETTE[theme].pupil)
+    r.setBowlShadow(theme === 'dark' ? 0.34 : 0.15)
     applyFaceFrames()
   }, [theme, applyFaceFrames])
+
+  // ── 日光轨：光源角随现实时间东升西落 ──
+  // 6:00 日出（东 = 屏幕右 φ0）→ 18:00 日落（西 = 屏幕左 φπ）扫过天顶；
+  // 夜间月光同路径但强度 0.35；晨昏 ±45min 内平滑过渡避免跳变。
+  // 光角一天 15°/h，60s 刷新绰绰有余；draw() 事件驱动，不改状态不重绘。
+  useEffect(() => {
+    const apply = () => {
+      const now = new Date()
+      const t = now.getHours() + now.getMinutes() / 60
+      const day = t >= 6 && t < 18
+      const p = day ? (t - 6) / 12 : (t >= 18 ? t - 18 : t + 6) / 12
+      const dusk = Math.min(
+        Math.abs(t - 6), Math.abs(t - 18),
+        Math.abs(t - 6 + 24), Math.abs(t - 18 + 24),
+        Math.abs(t - 6 - 24), Math.abs(t - 18 - 24),
+      )
+      const k = 0.35 + 0.65 * gsap.utils.clamp(0, 1, dusk / 0.75)
+      rendererRef.current?.setLight(p * Math.PI, k)
+    }
+    apply()
+    const id = window.setInterval(apply, 60_000)
+    return () => window.clearInterval(id)
+  }, [])
 
   // ── 微表情（canvas 版）：眨眼（shader 眼睑）+ 视线跟随 + 头部微倾（shader 合成）
   //    + 耳朵抖动/瞳孔放大（CatFace 变体帧混合）──
@@ -376,7 +411,7 @@ function CatBadge3D({
   useEffect(() => {
     const drowsy = theme === 'dark'
     const closedBase = drowsy ? 0.78 : 0 // 瞌睡眯眼基线
-    const state = { v: closedBase }
+    const state = closedState.current // 跨主题切换持久：从当前闭眼度渐变
     const applyClosed = () => rendererRef.current?.setEyeClosed(state.v)
     const blink = (times: number) => {
       const tl = gsap.timeline()
@@ -391,6 +426,7 @@ function CatBadge3D({
     // 减弱动效：全静态（同旧 useCatMicro——只保留眯眼基线，不调度任何动画）
     if (reducedMotion()) {
       Object.assign(s, { gxl: 0, gyl: 0, gxr: 0, gyr: 0, rot: 0, tx: 0, ty: 0, ear: 0, pupil: 0 })
+      state.v = closedBase
       applyMicroState()
       applyClosed()
       return () => {
@@ -411,8 +447,16 @@ function CatBadge3D({
       }, base + Math.random() * jitter)
     }
     scheduleBlink()
-    // 眯眼/睁眼过渡（同旧版：入睡前 0.9s，醒来 0.5s，power2.inOut）
-    gsap.to(state, { v: closedBase, duration: drowsy ? 0.9 : 0.5, ease: 'power2.inOut', onUpdate: applyClosed, overwrite: true })
+    // 眯眼/睁眼过渡：首挂载直接落位（暗色刷新不闪烁）；主题切换从当前闭眼度
+    // 渐变到新基线——入睡 1.5s / 醒来 1.0s（旧 0.9/0.5 偏快 + state 重建导致瞬变），
+    // power2.inOut 首尾缓，眼皮缓慢合拢/掀开更有"困意上头 / 秒醒回神"的生动感
+    if (closedInit.current) {
+      closedInit.current = false
+      state.v = closedBase
+      applyClosed()
+    } else {
+      gsap.to(state, { v: closedBase, duration: drowsy ? 1.5 : 1.0, ease: 'power2.inOut', onUpdate: applyClosed, overwrite: true })
+    }
 
     // 视线 + 头部微倾：quickTo 平滑滞后（旧版 0.45s / 0.9s power2.out）
     // 视线幅度 = 旧 PUPIL_MAX 5.4/4.0 SVG 单位换算局部单位（1 SVG = bowl/100）
@@ -741,15 +785,21 @@ function CatBadge3D({
 
     if (theme === 'dark' || !wasDark || reduced) return
 
-    gsap.to(ava, {
-      keyframes: [
-        { x: -5, duration: 0.07 },
-        { x: 5, duration: 0.07 },
-        { x: -3, duration: 0.07 },
-        { x: 3, duration: 0.07 },
-        { x: 0, duration: 0.07 },
-      ],
-    })
+    // 抖毛摇摆作用于徽章本体（badge3d 的 transform 全程由 gsap 管理，x 与 scale 并存
+    // 无冲突；旧版摇 .badge-ava 碗 = WebGL 版摇整只徽章）。空宿主层位移不可见，
+    // 之前挂错目标导致动效"丢失"。
+    const badge = badgeRef.current
+    if (badge) {
+      gsap.to(badge, {
+        keyframes: [
+          { x: -5, duration: 0.07 },
+          { x: 5, duration: 0.07 },
+          { x: -3, duration: 0.07 },
+          { x: 3, duration: 0.07 },
+          { x: 0, duration: 0.07 },
+        ],
+      })
+    }
     const colors = ['✨', '⭐', '✨', '💫', '⭐', '✨']
     colors.forEach((ch, i) => {
       const star = document.createElement('span')

@@ -53,6 +53,9 @@ uniform vec2 u_faceTilt;     // 头部微倾平移（SVG 单位，屏幕方向 x
 uniform vec3 u_fur;          // 眼睑色（palette.fur）
 uniform vec3 u_furEdge;      // 眼睑缘色（palette.furEdge）
 uniform vec3 u_pupilCol;     // 瞳孔色（palette.pupil）
+uniform float u_cosRy;       // 徽章 Y 轴旋转余弦——倒角环光角滑动用（光源世界固定）
+uniform vec2 u_light;        // x: 光源角 rad（世界系，随现实时间东升西落）y: 强度 0..1（日 1 / 月 0.35）
+uniform float u_bowlShA;     // 碗面内凹阴影强度（浅 0.15 / 暗 0.34——暗底需更深才可读）
 
 // straight-alpha over 合成
 vec4 over(vec4 top, vec4 bot) {
@@ -135,22 +138,47 @@ void main() {
       * lidGate * clip;
     rgb = mix(rgb, u_fur, lid);
     rgb = mix(rgb, u_furEdge, clamp(edgeLine, 0.0, 1.0));
-    float be = 1.0 - smoothstep(u_bowl - u_px, u_bowl, r);
-    gl_FragColor = vec4(rgb * t.a * be, t.a * be);
+    // 碗面内凹阴影（对齐旧 .badge-ava inset 0 2px 10px rgba(0,0,0,.24)）：
+    // 贴碗缘的 12px 环带，强度随外法线 y 衰减（顶 1.0 / 侧 ≈0.2 / 底 0）——
+    // CSS 偏移 (0,2px) 的内凹语义 = 上缘最强、下缘无
+    float rimT = u_bowl - r;
+    float ny = v_p.y / max(r, 1e-4);
+    float bowlSh = u_bowlShA * (1.0 - smoothstep(0.0, 12.0 * u_px, rimT)) * mix(0.6, 1.0, smoothstep(-0.75, 0.75, ny));
+    rgb *= 1.0 - bowlSh;
+    float be = 1.0 - smoothstep(u_bowl - 1.5 * u_px, u_bowl, r);
+    // 碗缘不做 alpha 渐隐（be 乘 alpha 会透出 CSS 亮底盘 → 暗色下呈一圈亮齿），
+    // 改为颜色过渡到「碗缘采样色 × 内阴影」——与碗外裙边同色同式，跨缘完全连续。
+    // 碗缘采样方向必须与主路径 UV 同构（uv.y = 0.5 - y·0.5，GL y 上正 ↔ SVG y 下正）：
+    // 若不翻转 y，上半碗缘会采到下半圆周内容——胡须末端（浅蓝）恰好落在那里，
+    // 左右对称各染出一个浅蓝像素点。
+    vec2 vDir = v_p / max(r, 1e-4);
+    vec2 uvRim = vec2(vDir.x * 0.5 + 0.5, 0.5 - vDir.y * 0.5);
+    float nyR = v_p.y / max(r, 1e-4);
+    float rimSh = u_bowlShA * mix(0.6, 1.0, smoothstep(-0.75, 0.75, nyR));
+    vec3 rimC = texture2D(u_faceTex, uvRim).rgb * (1.0 - rimSh);
+    rgb = mix(rimC, rgb, be);
+    gl_FragColor = vec4(rgb * t.a, t.a);
     return;
   }
 
-  // 背面头像碗：碗内贴纹理（含顶部内凹阴影近似），碗外走背面面片着色
+  // 背面头像碗：碗内贴纹理（碗面内凹阴影与正面同规格），碗外走背面面片着色
   // uv 用世界坐标 v_w（观察者对齐）：翻转时采样窗口相对碗滑动——
   // 图像从侧面"滚进"碗内、随翻转继续滚过（用户指定的滚筒动态），
   // 任意翻转角度下图像无镜像；uv 取反 = 恒定旋转 180°（真机实测头像方向需倒转）
   if (u_mode > 1.5 && r < u_bowl) {
     vec2 uv = 0.5 - v_w / (2.0 * u_bowl);
     vec4 t = texture2D(u_tex, uv);
-    float sh = (1.0 - smoothstep(-u_bowl, -u_bowl + 12.0 * u_px, v_p.y)) * 0.24;
-    t.rgb *= 1.0 - sh;
+    // 碗面内凹阴影，与正面同规格（上缘最强/下缘无）
+    float rimT = u_bowl - r;
+    float ny = v_p.y / max(r, 1e-4);
+    float bowlSh = u_bowlShA * (1.0 - smoothstep(0.0, 12.0 * u_px, rimT)) * mix(0.6, 1.0, smoothstep(-0.75, 0.75, ny));
+    t.rgb *= 1.0 - bowlSh;
     float be = 1.0 - smoothstep(u_bowl - u_px, u_bowl, r);
-    gl_FragColor = vec4(t.rgb * t.a * be, t.a * be);
+    // 背面碗缘同正面：不做 alpha 渐隐，颜色过渡到「碗缘采样色 × 内阴影」
+    float rimShB = u_bowlShA * mix(0.6, 1.0, smoothstep(-0.75, 0.75, ny));
+    vec3 rimB = texture2D(u_tex, 0.5 - v_w / max(length(v_w), 1e-4) * 0.5).rgb * (1.0 - rimShB);
+    t.rgb = mix(rimB, t.rgb, be);
+    gl_FragColor = vec4(t.rgb * t.a, t.a);
     return;
   }
 
@@ -159,14 +187,44 @@ void main() {
   float ha = u_hi.a * (1.0 - smoothstep(0.0, 0.55, g));
   vec4 c = vec4(u_base.rgb, u_base.a); // BISECT: skip hi over
 
+  // 碗缘过渡裙边（正面）：碗外 2.5px 内向「碗缘采样色 × 内阴影」渐变 + alpha 提满。
+  // 暗色夜光表盘（碗底 #1d2640）与面片底色的色差会让 1px AA 显成锯齿圈——
+  // 用裙边把硬跳变拉成柔坡；采样含 bowlSh 保证跨缘无缝。
+  if (u_mode < 1.5 && r < u_bowl + 2.5 * u_px) {
+    float skirt = 1.0 - smoothstep(0.0, 2.5 * u_px, r - u_bowl);
+    // 与碗内碗缘采样同式：uv.y 翻转（理由同上——防止采到对侧圆周的胡须末端）
+    vec2 vDir = v_p / max(r, 1e-4);
+    vec2 uvRim = vec2(vDir.x * 0.5 + 0.5, 0.5 - vDir.y * 0.5);
+    float nyR = v_p.y / max(r, 1e-4);
+    float rimSh = u_bowlShA * mix(0.6, 1.0, smoothstep(-0.75, 0.75, nyR));
+    vec3 rim = texture2D(u_faceTex, uvRim).rgb * (1.0 - rimSh);
+    c.rgb = mix(c.rgb, rim, skirt);
+    c.a = mix(c.a, 1.0, skirt);
+  }
+
   if (u_mode < 1.5) {
-    // 正面独有：1px 顶边高光线 + 4px inset 亮环（--glow-inner）+ 30px 玻璃导光
+    // 正面独有：1px 顶边高光线 + 斜面倒角环 v2 + 30px 玻璃导光
     float topLine = smoothstep(1.0 - 2.0 * u_px, 1.0 - 0.8 * u_px, r)
       * (1.0 - smoothstep(-0.9, -0.4, v_p.y));
     c = over(vec4(u_glowIn.rgb, u_glowIn.a * topLine), c);
 
-    float ring4 = smoothstep(1.0 - 4.5 * u_px, 1.0 - 3.5 * u_px, r);
-    c = over(vec4(u_glowIn.rgb, u_glowIn.a * ring4), c);
+    // 斜面倒角环 v2：整圈连续角向渐变，单光源（现实时间日光轨：6→18 时从东经
+    // 天顶到西，夜间月光减半——u_light 由组件每分钟更新）。光源世界固定 →
+    // 徽章绕 Y 旋转时环上光角随 cos(ry) 滑动（φ_L = atan2(sinθ, cosθ·cosRy)），
+    // 翻转时高光沿环跑 + glint 窄弧扫过。
+    float ringBand = smoothstep(1.0 - 4.5 * u_px, 1.0 - 3.5 * u_px, r);
+    float phi = atan(v_p.y, v_p.x);
+    float thL = atan(sin(u_light.x), cos(u_light.x) * u_cosRy);
+    float dl = cos(phi - thL); // 1 = 正对光源 → -1 = 背光侧
+    // 暗环基底：整圈连续（描边色），亮侧稍薄、背侧最重
+    float aD = (0.20 - 0.08 * dl) * ringBand;
+    c = over(vec4(u_border.rgb, max(aD, 0.0)), c);
+    // 白高光主峰：亮侧满幅 → 背侧留 0.06 基底，pow1.6 让两侧过渡更柔；夜间整体减光
+    float aW = u_glowIn.a * u_light.y * (0.06 + 0.94 * pow(max(dl, 0.0), 1.6)) * ringBand;
+    c = over(vec4(u_glowIn.rgb, aW), c);
+    // glint 窄弧：紧贴光角的尖峰反光（翻转时的"玻璃反光丝"）
+    float aG = 0.38 * u_light.y * pow(max(dl, 0.0), 20.0) * ringBand;
+    c = over(vec4(vec3(1.0), aG), c);
 
     float t30 = clamp((1.0 - r) / (30.0 * u_px), 0.0, 1.0);
     c = over(vec4(u_inset.rgb, u_inset.a * t30 * t30 * (3.0 - 2.0 * t30)), c);
