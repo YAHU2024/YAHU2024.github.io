@@ -95,6 +95,8 @@ export class BadgeRenderer {
   private layers: LayerSpec[] = []
   private face: FaceColors | null = null
   private disposed = false
+  /** 绘制合并标志：draw() 已排队待 microtask flush */
+  private drawQueued = false
 
   constructor(canvas: HTMLCanvasElement, opts?: { onFatal?: () => void }) {
     this.canvas = canvas
@@ -401,7 +403,27 @@ export class BadgeRenderer {
     ])
   }
 
+  /**
+   * 状态变更入口：只置脏排队，同一同步块内合并为一次真实绘制。
+   * 一次 mousemove 会连发 8 个 quickTo × 4 setter = 32 次 draw()——其中
+   * 中间状态从不被 paint（浏览器只读帧末 uniform），全绘是纯浪费；
+   * microtask 在 paint 前必然执行 → 视觉零差异，主线程/GPU 负载降 ~97%。
+   * 需要同步绘制的调用点（如 setSize 后立即测量）不受影响：微任务在当前
+   * 同步块结束后立刻执行，任何跨进程观察者（截图/合成器）都读到新帧。
+   */
   draw() {
+    if (this.disposed || this.drawQueued) return
+    const gl = this.gl
+    if (!gl) return
+    this.drawQueued = true
+    queueMicrotask(() => {
+      this.drawQueued = false
+      this.flush()
+    })
+  }
+
+  /** 真实绘制（draw() 的微任务 flush 目标） */
+  private flush() {
     const gl = this.gl
     if (!gl || !this.program || this.cssSize <= 0 || !this.face || this.disposed) return
     const m = this.rotMat()
