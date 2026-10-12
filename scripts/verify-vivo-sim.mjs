@@ -132,12 +132,14 @@ const collect = `(() => {
   const cs = (el, pseudo) => (el ? getComputedStyle(el, pseudo || null) : null)
   const q = (s) => document.querySelector(s)
   const glassEl = q('.glass')
+  const glCanvas = q('.badge-canvas')
   return {
     mediaHover: matchMedia('(hover: none)').matches,
     mediaCoarse: matchMedia('(pointer: coarse)').matches,
-    badgeLayers: document.querySelectorAll('.badge-layer').length,
-    badgeWillChange: cs(q('.badge'))?.willChange ?? 'NO_EL',
-    faceBackdrop: cs(q('.badge-face'))?.backdropFilter ?? 'NO_EL',
+    badgeCanvas: !!glCanvas,
+    badge2dFallback: !!q('.badge2d'),
+    badge3dWillChange: cs(q('.badge3d'))?.willChange ?? 'NO_EL',
+    overlayRemoved: !q('.cat-face-overlay'), // 融合重构后 DOM 覆盖层已整体删除（猫脸在 canvas 内）
     glassBackdrop: glassEl ? cs(glassEl).backdropFilter : 'NO_EL',
     glassBgAlpha: glassEl ? cs(glassEl).backgroundColor : 'NO_EL',
     blobBeforeAnim: cs(q('.blob'), '::before')?.animationName ?? 'NO_EL',
@@ -188,17 +190,19 @@ console.log('[progress] 汇总判定')
 const verdict1 =
   jsShimChecks.mediaHover === false &&
   jsShimChecks.mediaCoarse === true &&
-  jsShimChecks.badgeLayers === 16 &&
+  jsShimChecks.badgeCanvas === true &&
+  jsShimChecks.badge2dFallback === false &&
   jsShimChecks.catSvgPresent === true
 const verdict2 =
   touchChecks.mediaCoarse === true &&
-  touchChecks.badgeLayers === 16 &&
-  touchChecks.badgeWillChange === 'auto' &&
-  touchChecks.faceBackdrop === 'none' &&
+  touchChecks.badgeCanvas === true &&
+  touchChecks.badge2dFallback === false &&
+  touchChecks.overlayRemoved === true &&
   touchChecks.glassBackdrop === 'none' &&
   touchChecks.blobBeforeAnim === 'none' &&
   touchChecks.catSvgPresent === true
-const verdict3 = combinedCount >= 2 && hoverOnlyCount === 0
+// 融合重构删掉了 overlay 指针规则块 → 构建产物只剩 1 个合并媒体查询块（glass/blob 降级）
+const verdict3 = combinedCount >= 1 && hoverOnlyCount === 0
 
 const report = {
   chain3_构建产物结构: { combinedMediaBlocks: combinedCount, 仅hoverNone残留: hoverOnlyCount, pass: verdict3 },

@@ -154,12 +154,15 @@ await sleep(2600) // 等入场动画与快照渲染稳定
 const checks = await evalValue(`(() => {
       const cs = (el, pseudo) => el ? getComputedStyle(el, pseudo || null) : null
       const q = (s) => document.querySelector(s)
+      const glCanvas = q('.badge-canvas')
+      const gl = glCanvas ? (glCanvas.getContext('webgl') || glCanvas.getContext('experimental-webgl')) : null
       return {
         hoverNone: matchMedia('(hover: none)').matches,
         pointerCoarse: matchMedia('(pointer: coarse)').matches,
-        badgeLayers: document.querySelectorAll('.badge-layer').length,
-        badgeWillChange: cs(q('.badge'))?.willChange ?? 'NO_EL',
-        faceBackdrop: cs(q('.badge-face'))?.backdropFilter ?? 'NO_EL',
+        badgeCanvas: !!glCanvas,
+        badgeWebGL: !!gl,
+        badgeDrawingBuffer: gl ? gl.drawingBufferWidth + 'x' + gl.drawingBufferHeight : 'NO_GL',
+        badge2dFallback: !!q('.badge2d'),
         blobBeforeAnim: cs(q('.blob'), '::before')?.animationName ?? 'NO_EL',
         blobWillChange: cs(q('.blob'))?.willChange ?? 'NO_EL',
         glassBackdrop: cs(q('.glass'))?.backdropFilter ?? 'NO_EL',
@@ -276,8 +279,6 @@ await send('Runtime.evaluate', {
       .blob::before { animation: blob-cross 11s ease-in-out infinite alternate !important; }
       .blob, .blob-par { will-change: transform !important; }
       .glass { backdrop-filter: blur(18px) !important; -webkit-backdrop-filter: blur(18px) !important; background: var(--glass) !important; }
-      .badge { will-change: transform !important; }
-      .badge-face { backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; }
     }\`
     document.head.appendChild(s)
   })()`,

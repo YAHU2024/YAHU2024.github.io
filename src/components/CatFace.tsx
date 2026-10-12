@@ -39,7 +39,7 @@ type Palette = {
   brow: string
 }
 
-const PALETTE: Record<Theme, Palette> = {
+export const PALETTE: Record<Theme, Palette> = {
   light: {
     fur: '#2f2f3a',
     furEdge: '#20202a',

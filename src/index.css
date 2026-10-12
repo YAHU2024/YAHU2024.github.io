@@ -31,10 +31,7 @@
   --muted-text: #54545f;
   --accent: #f0653c;
   /* 猫徽章专用：薄玻璃水晶牌（侧壁色板在 JS 内按角度打光，此处为面/倒角/高光） */
-  --edge-hi: #ff8a66;
-  --edge-lo: #c44a26;
   --face-base: rgba(255, 253, 250, 0.75); /* 面：玻璃色调，阻断看穿（透明集中在边缘） */
-  --badge-filter: none; /* 面背景模糊：A/B 开关，置 blur(10px) 可恢复并复现边缘锯齿 */
   --badge-hi: rgba(255, 255, 255, 0.78);
   --badge-inset: rgba(255, 255, 255, 0.28);
   --accent-ink: #ffffff;
@@ -102,10 +99,7 @@
   --muted-text: #b9c4d8;
   --accent: #7dd3fc;
   /* 猫徽章专用 */
-  --edge-hi: #a5e3ff;
-  --edge-lo: #2f6f8c;
   --face-base: rgba(19, 25, 40, 0.72);
-  --badge-filter: none; /* 与浅色同开关 */
   --badge-hi: rgba(255, 255, 255, 0.12);
   --badge-inset: rgba(255, 255, 255, 0.06);
   --accent-ink: #072331;
@@ -333,15 +327,6 @@
   z-index: 1;
 }
 
-/* 猫卡：Zzz 粒子（深色主题打瞌睡） */
-.zzz-letter {
-  position: absolute;
-  font-weight: 800;
-  color: var(--accent);
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* 猫卡：醒来的星星粒子 */
 .wake-star {
   position: absolute;
@@ -350,170 +335,29 @@
 }
 
 /* ============================================================
-   猫徽章：圆形玻璃 3D 翻转（自由 X+Y）
+   猫徽章舞台：透视与尺寸变量（WebGL 分支的猫脸覆盖层仍吃透视）
    ============================================================ */
-/* 透视挂在舞台上，让翻转/侧壁有真实景深；容器本身不能带 backdrop-filter，否则 3D 会被 flatten */
+/* 透视挂在舞台上，让猫脸覆盖层的 rotateX/rotateY 有真实景深 */
 .cat-stage {
   perspective: 1000px; /* 加厚到 40px 后略放缓透视，避免边缘过度畸变 */
   /* 徽章基准直径：窄屏时收缩到容器宽度（375px 视口下 Hero 的 px-6 只留 327px，
-     写死 340px 会横向溢出）。JS 侧按实际直径重算侧壁半径，见 CatCard 的 ResizeObserver */
+     写死 340px 会横向溢出）。JS 侧按实际直径重算画布背板，见 CatBadge 的 ResizeObserver */
   --badge-size: 340px;
 }
-.badge {
-  position: relative;
-  width: min(var(--badge-size), 100%);
-  height: auto;
-  aspect-ratio: 1;
-  margin: 0 auto;
-  border-radius: 50%;
-  transform-style: preserve-3d;
-  cursor: grab;
-  touch-action: none; /* 允许徽章内拖拽翻转，阻止页面滚动 */
-  will-change: transform;
-  z-index: 1;
-}
-/* 悬浮外投影挂在 ::after 上：拖拽/翻转时只过渡 opacity（合成器渲染，零重绘），
-   避免 box-shadow none↔值的瞬时跳变——那正是"变动后阴影突然出现"的突兀感来源 */
-.badge::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.38);
-  opacity: 1;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-}
-/* 拖拽/翻转（含 spin）淡出外投影：box-shadow 画在 z=0 平面，
-   倾斜时会从半透明侧壁后面透出，成为侧壁中部的"黑色阴影层"；
-   悬停微浮（is-moving 但非 is-dragging）不淡出，保留悬浮感 */
-.badge.is-dragging::after {
-  opacity: 0;
-}
-.badge:active {
-  cursor: grabbing;
-}
-.badge:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--accent);
-}
-/* 光环（悬停时由 JS 提升 opacity） */
-/* 正反两面 */
-.badge-face {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  overflow: hidden;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* 融入站点玻璃语言。注意：backdrop-filter 的圆形遮罩在 Chromium 下不走抗锯齿，
-     是徽章边缘锯齿的头号嫌疑；--badge-filter 置 none 即整条链路关闭（blur(0px) 无效，仍走合成） */
-  backdrop-filter: var(--badge-filter);
-  -webkit-backdrop-filter: var(--badge-filter);
-}
-.badge-front {
-  transform: translateZ(14px) scale(var(--face-shrink, 1)); /* 圆角倒角：面与侧壁轮廓连续 */
-  border: 1px solid var(--gborder); /* 与站点 .glass 同规格 */
-  background:
-    radial-gradient(120% 120% at 30% 22%, var(--badge-hi), transparent 55%),
-    var(--face-base);
-  box-shadow:
-    inset 0 1px 0 var(--glow-inner),
-    /* 站点玻璃顶部高光 */ inset 0 0 0 4px var(--glow-inner),
-    /* 前倒角亮环（半透高光，非实色金属） */ inset 0 0 26px var(--accent-soft),
-    /* 玻璃导光 */ inset 0 0 30px var(--badge-inset);
-}
-.badge-back {
-  transform: rotateY(180deg) translateZ(14px) scale(var(--face-shrink, 1));
-  background:
-    radial-gradient(120% 120% at 70% 22%, var(--badge-hi), transparent 55%),
-    var(--face-base);
-  border: 1px solid var(--gborder);
-  box-shadow:
-    inset 0 0 26px var(--accent-soft);
-  /* 旧版背面 4px 黑色内环（rgba(0,0,0,0.22)）已移除：拖拽倾斜时它会从
-     半透侧壁后透出，成为两段色带之间的"黑色阴影层" */
-  /* 旧版背面文案（slogan + 图标环）遗留的 padding/gap/flex-direction 已清除：
-     否则 .badge-back-ava 的 88.235% 会以缩小后的 content box 为基准（254px），
-     与正面矢量猫碗（300px）的边缘圆环错位 */
-}
-.badge-ava {
-  position: relative;
-  /* 300/340：跟随徽章直径等比收缩 */
-  width: 88.235%;
-  height: 88.235%;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--bg);
-  /* 头像嵌入亚克力：内凹阴影，避免看起来是贴上去的贴纸 */
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.24);
-}
-/* 矢量猫脸：铺满圆形头像碗；不要加 will-change，微表情由 GSAP 直接驱动 SVG 变换 */
+
+/* 矢量猫脸（快照源容器内的 SVG；正面渲染走 WebGL 纹理） */
 .cat-svg {
   display: block;
   width: 100%;
   height: 100%;
   overflow: visible;
 }
-.badge-back-ava {
-  width: 88.235%;
-  height: 88.235%;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--bg);
-  pointer-events: none;
-  -webkit-user-drag: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-/* 背面头像碗的内凹阴影（与正面 .badge-ava 同规格）：
-   <img> 是替换元素，自身的 inset box-shadow 会被图片内容盖住画不出来，
-   用 ::after 覆盖层补上——尺寸对齐 88.235% 头像圆，悬于图片之上、不响应指针 */
-.badge-back::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 88.235%;
-  height: 88.235%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.24);
-  pointer-events: none;
-}
 
-/* 运动期间（悬停微浮 / 翻转）关闭正反面背景模糊：
-   backdrop-filter 会在元素位移时每帧重新采样并模糊背景，是翻转卡顿主因。
-   静止时徽章不动，模糊结果可被缓存，代价归零 */
-.badge.is-moving .badge-face {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-/* 移动端（触屏设备）专项修复：
-   - will-change 触发图层提升后，移动 WebKit 会把 preserve-3d 子树拍扁
-     （实测：42 层侧壁塌缩成灰饼盖住猫脸）→ 触屏上移除，桌面保留；
-   - backdrop-filter 在移动端 3D 语境下采样区域不遵循 border-radius，
-     会渲染成方形色块，且滚动时每帧重采样 → 强制关闭；
-   - GPU 图层内存有限，合成层数在 CatCard.tsx 的 isTouch 分支降为 16 层；
-   - 判定追加 pointer:coarse：vivo 浏览器等定制内核触屏下不上报 hover:none
-     （实测其玻璃纯色降级不生效、徽章跑 42 层触发塌缩 bug），
-     pointer:coarse 由系统触屏硬件上报，不受内核怪癖影响 */
-@media (hover: none), (pointer: coarse) {
-  .badge {
-    will-change: auto;
-  }
-  .badge-face {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-}
+/* 移动端（触屏设备）性能降级见下方全局段；徽章本体是单个 canvas，
+   无 preserve-3d 栈、无 DOM 覆盖层，不再需要触屏专项规则 */
 
 /* 老 WebView（不支持 aspect-ratio）高度塌陷兜底：
-   用 padding-top 百分比撑出正方形行，徽章同格铺满；
+   用 padding-top 百分比撑出正方形行，徽章尺寸盒同格铺满；
    支持 aspect-ratio 的浏览器不走此分支，行为零变化 */
 @supports not (aspect-ratio: 1) {
   .cat-stage {
@@ -524,7 +368,7 @@
     grid-area: 1 / 1;
     padding-top: 100%;
   }
-  .badge {
+  .badge-box {
     grid-area: 1 / 1;
     height: 100%;
   }
@@ -561,24 +405,12 @@
   }
 }
 
-/* 真 3D 侧壁：72 段拼成亚克力筒
-   尺寸（width/height/margin）与颜色均由 JS 内联注入：
-   颜色需按角度周向打光，且不能用 filter（会 flatten 掉 preserve-3d） */
-.badge-layer {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border-radius: 50%;
-  /* 不要加 will-change：侧壁是静态的（只有父级 .badge 在转），
-     层数自适应（桌面 42 / 触屏 16，见 CatCard.tsx），合成压力已控制在移动端预算内 */
-  pointer-events: none;
-}
 /* 接触投影：撑起重量感（z-index 0，位于徽章 z-index 1 之下） */
 .badge-shadow {
   position: absolute;
   left: 50%;
   bottom: -2px;
-  /* 与 .badge 用同一个 min() 表达式，保证任何视口下投影都与徽章同心 */
+  /* 与 .badge-box 用同一个 min() 表达式，保证任何视口下投影都与徽章同心 */
   width: calc(min(var(--badge-size), 100%) * 0.847);
   height: 38px;
   margin-left: calc(min(var(--badge-size), 100%) * -0.4235);
@@ -599,15 +431,152 @@
   opacity: 0.55;
   will-change: transform;
 }
-/* 猫脸内的可动部件：禁止原生拖拽/选中，避免抢走翻转手势 */
-.cat-svg [data-head],
-.cat-svg [data-pupil],
-.cat-svg [data-lid],
-.cat-svg [data-ear] {
+
+/* ============================================================
+   猫徽章 WebGL 渲染层（CatBadge，替代旧 CSS 3D 路径）
+   3D 部分由 canvas 自渲染，绕开移动内核 preserve-3d + 圆角裁剪的
+   合成器缺陷族（crbug 157218/41152235/761298/1207151）。
+   分层：.badge-box（尺寸盒）> .badge3d（交互层）> canvas + 猫脸覆盖层
+   ============================================================ */
+/* 尺寸盒：只负责撑出 min(--badge-size, 100%) 的正方形，两条渲染分支共用 */
+.badge-box {
+  position: relative;
+  width: min(var(--badge-size), 100%);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  z-index: 1;
+}
+/* 交互层：pointer/键盘事件挂这里；均匀缩放 squash 走 2D transform，安全 */
+.badge3d {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none; /* 徽章内拖拽翻转，阻止页面滚动 */
+  will-change: transform;
+}
+.badge3d::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.38);
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+/* 拖拽/翻转（含 spin）淡出外投影，避免从半透侧壁后透出成"黑色阴影层" */
+.badge3d.is-dragging::after {
+  opacity: 0;
+}
+.badge3d:active {
+  cursor: grabbing;
+}
+.badge3d:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent);
+}
+/* WebGL 画布：比徽章放大 CANVAS_MARGIN（1.35）倍居中，旋转出界不裁切；
+   静止时零重绘（渲染完全事件驱动），will-change 无必要 */
+.badge-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+/* 状态提示固定层：醒来星星宿主（不随翻转） */
+.badge-state-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+/* 隐藏快照源：CatFace SVG 供光栅化为正面纹理（不参与显示） */
+.badge-face-host {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── 2D 兜底徽章（WebGL 不可用 / context lost 恢复失败）── */
+.badge2d {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(120% 120% at 30% 22%, var(--badge-hi), transparent 55%),
+    var(--face-base);
+  border: 1px solid var(--gborder);
+  box-shadow:
+    inset 0 1px 0 var(--glow-inner),
+    inset 0 0 0 4px var(--glow-inner),
+    inset 0 0 26px var(--accent-soft),
+    inset 0 0 30px var(--badge-inset);
+}
+.badge2d:active {
+  cursor: grabbing;
+}
+.badge2d:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 var(--glow-inner),
+    inset 0 0 0 4px var(--glow-inner),
+    inset 0 0 26px var(--accent-soft),
+    inset 0 0 30px var(--badge-inset),
+    0 0 0 3px var(--accent);
+}
+/* 旋转体：单层平面元素，rotationY 由 GSAP 驱动；内容在 90° 中点换面 */
+.badge2d-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+}
+.badge2d-face {
+  position: relative;
+  width: 88.235%;
+  height: 88.235%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.24);
+}
+.badge2d-face .cat-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.badge2d-ava {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
   pointer-events: none;
   -webkit-user-drag: none;
   user-select: none;
   -webkit-user-select: none;
+}
+.badge2d-y {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-weight: 800;
+  font-size: 3rem;
+  color: var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -825,7 +794,7 @@
     background: var(--glass-solid);
   }
 }
-/* 滑动期间关 blur：backdrop-filter 每帧重采样，运动期降级（复用 .badge is-moving 策略） */
+/* 滑动期间关 blur：backdrop-filter 每帧重采样，运动期降级（复用 is-moving 策略） */
 .nav-pill.is-moving {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;

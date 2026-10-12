@@ -8,7 +8,7 @@ import Toolbox from '@/sections/Toolbox'
 import About from '@/sections/About'
 import Footer from '@/sections/Footer'
 import ScrollProgress from '@/components/ScrollProgress'
-import CatCard, { type CatCardHandle } from '@/components/CatCard'
+import CatBadge, { type CatBadgeHandle } from '@/components/badge/CatBadge'
 import Reveal from '@/components/Reveal'
 import { useGitHub } from '@/hooks/useGitHub'
 import { useScrollParallax } from '@/hooks/useScrollParallax'
@@ -77,7 +77,7 @@ export default function Home() {
   const active = view === 'recent' ? 'recent' : section
 
   const contentRef = useRef<HTMLDivElement>(null)
-  const catApi = useRef<CatCardHandle>(null)
+  const catApi = useRef<CatBadgeHandle>(null)
   const animating = useRef(false)
   const tlRef = useRef<gsap.core.Timeline | null>(null)
   const pendingAnchor = useRef<string | null>(null)
@@ -230,7 +230,7 @@ export default function Home() {
               style={view === 'recent' ? { top: `${catTop}px` } : undefined}
             >
               <Reveal delay={150}>
-                <CatCard ref={catApi} />
+                <CatBadge ref={catApi} />
               </Reveal>
             </div>
           </div>
