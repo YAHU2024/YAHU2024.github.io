@@ -82,11 +82,19 @@ interface SnapshotRepo {
   homepage: string | null
 }
 
+/** 单个项目的最新 release（由 scripts/fetch-github.mjs 构建期抓取，key 对应 projects.ts 的 releaseKey） */
+export interface SnapshotRelease {
+  tag: string
+  publishedAt: string | null
+  url: string
+}
+
 export interface Snapshot {
   fetchedAt: string
   contributionsLastYear: number
   user: SnapshotUser
   repos: SnapshotRepo[]
+  releases?: Record<string, SnapshotRelease>
 }
 
 export const snapshot = snapshotJson as Snapshot

@@ -8,6 +8,10 @@ import path from 'node:path'
 
 const LOGIN = process.env.GH_LOGIN || 'YAHU2024'
 const TOKEN = process.env.GITHUB_TOKEN || ''
+// 需要「构建期动态版本号」的项目：key 与 projects.ts 的 releaseKey 对应
+const RELEASE_REPOS = [
+  { key: 'myTool', repo: `${LOGIN}/myTool` },
+]
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(ROOT, 'src', 'data', 'snapshot.json')
 
@@ -29,6 +33,7 @@ async function main() {
     contributionsLastYear: 0,
     user: { followers: 0, public_repos: 0 },
     repos: [],
+    releases: {},
   }
   try {
     prev = { ...prev, ...JSON.parse(await readFile(OUT, 'utf8')) }
@@ -63,6 +68,18 @@ async function main() {
     console.log(`[github] repos ok: ${next.repos.length} 个`)
   } catch (e) {
     console.warn(`[github] repos 抓取失败，沿用旧值：${e.message}`)
+  }
+
+  next.releases = { ...(prev.releases || {}) }
+  for (const { key, repo } of RELEASE_REPOS) {
+    try {
+      const rel = await api(`/repos/${repo}/releases/latest`)
+      next.releases[key] = { tag: rel.tag_name, publishedAt: rel.published_at, url: rel.html_url }
+      console.log(`[github] release ${key} ok: ${rel.tag_name}`)
+    } catch (e) {
+      // 404 = 该仓库还没有 release，同样沿用旧值
+      console.warn(`[github] release ${key} 抓取失败，沿用旧值：${e.message}`)
+    }
   }
 
   if (TOKEN) {

@@ -6,6 +6,7 @@ import {
   type ProjectStatus,
 } from '@/data/projects'
 import { useT, useTL } from '@/hooks/useLocale'
+import { snapshot } from '@/data/github'
 import Reveal from '@/components/Reveal'
 import GlassCard from '@/components/GlassCard'
 
@@ -100,7 +101,15 @@ function ProjectCard({ p }: { p: ProjectItem }) {
         </div>
       )}
 
-      {p.note && <p className="gc-z3 mt-3 text-xs leading-relaxed text-muted">{tl(p.note)}</p>}
+      {p.note && (
+        <p className="gc-z3 mt-3 text-xs leading-relaxed text-muted">
+          {p.releaseKey && snapshot.releases?.[p.releaseKey]?.tag
+            ? tl(p.note).replaceAll('{version}', snapshot.releases[p.releaseKey].tag)
+            : p.noteFallback
+              ? tl(p.noteFallback)
+              : tl(p.note)}
+        </p>
+      )}
 
       {(p.links?.repo || p.links?.site) && (
         <div className="gc-z2 mt-5 flex flex-wrap items-center gap-x-4 gap-y-1">

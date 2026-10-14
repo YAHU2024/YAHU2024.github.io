@@ -1,53 +1,94 @@
 {
-  "fetchedAt": "2026-08-31",
+  "fetchedAt": "2026-10-14",
   "contributionsLastYear": 358,
   "user": {
     "followers": 2,
-    "public_repos": 14
+    "public_repos": 15
   },
   "repos": [
     {
       "name": "myTool",
       "description": "AI 时代的学习工具：实时渲染流式输出、智能内容识别、多模式深度解析与追问轻对话、本地历史与隐私安全。",
       "language": "C#",
-      "stargazers_count": 1,
+      "stargazers_count": 5,
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/myTool",
-      "updated_at": "2026-08-14T00:00:00Z",
+      "updated_at": "2026-10-13T02:43:18Z",
       "topics": [
         "ai-tools",
         "csharp",
         "desktop-app",
         "dotnet",
         "openai",
+        "productivity",
+        "streaming",
+        "translation",
+        "translator",
+        "windows",
         "wpf"
       ],
       "fork": false,
       "homepage": "https://yahu2024.github.io/myTool/"
     },
     {
-      "name": "Unarchive",
-      "description": "Turn Video Favorites into a Personal Knowledge Base",
-      "language": "Python",
+      "name": "YAHU2024.github.io",
+      "description": null,
+      "language": "TypeScript",
       "stargazers_count": 0,
       "forks_count": 0,
-      "html_url": "https://github.com/YAHU2024/Unarchive",
-      "updated_at": "2026-08-14T00:00:00Z",
+      "html_url": "https://github.com/YAHU2024/YAHU2024.github.io",
+      "updated_at": "2026-10-12T04:48:31Z",
       "topics": [],
       "fork": false,
       "homepage": null
     },
     {
-      "name": "yahu.github.io",
-      "description": null,
-      "language": null,
-      "stargazers_count": 0,
+      "name": "PTCLI",
+      "description": "Cisco Packet Tracer CLI — 命令行管理 .pkt 文件和网络设备  ",
+      "language": "Python",
+      "stargazers_count": 1,
       "forks_count": 0,
-      "html_url": "https://github.com/YAHU2024/yahu.github.io",
-      "updated_at": "2026-08-14T00:00:00Z",
+      "html_url": "https://github.com/YAHU2024/PTCLI",
+      "updated_at": "2026-09-04T05:12:08Z",
       "topics": [],
       "fork": false,
       "homepage": null
+    },
+    {
+      "name": "Unarchive",
+      "description": "Turn Video Favorites into a Personal Knowledge Base",
+      "language": "Kotlin",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/Unarchive",
+      "updated_at": "2026-09-02T15:49:41Z",
+      "topics": [],
+      "fork": false,
+      "homepage": ""
+    },
+    {
+      "name": "DeskBox",
+      "description": "A free, open-source Windows desktop organizer with native-feeling WinUI 3 widgets.",
+      "language": null,
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/DeskBox",
+      "updated_at": "2026-09-01T11:30:47Z",
+      "topics": [],
+      "fork": true,
+      "homepage": "https://deskbox.fun"
+    },
+    {
+      "name": "agent-vision-toolkit",
+      "description": "为纯文本模型\"看图“设计更好的视觉工具箱和技能，支持多图理解，图片问答，前端UI还原、GUI 自动化等，并可选无缝接入多个主流agent，直接识别粘贴图片｜ A vision toolkit and skill designed for text-only llms — image Q&A, long-screenshot OCR, frontend UI restoration, and GUI automation, with optional seamless integration for Codex, Claude Code, Pi, Oh My Pi, and OpenCode",
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/agent-vision-toolkit",
+      "updated_at": "2026-08-10T08:36:39Z",
+      "topics": [],
+      "fork": true,
+      "homepage": "https://agent-vision.anionex.me"
     },
     {
       "name": "claude-skills",
@@ -56,9 +97,21 @@
       "stargazers_count": 0,
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/claude-skills",
-      "updated_at": "2026-07-21T00:00:00Z",
+      "updated_at": "2026-07-21T03:11:42Z",
       "topics": [],
       "fork": false,
+      "homepage": ""
+    },
+    {
+      "name": "soul",
+      "description": null,
+      "language": null,
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/soul",
+      "updated_at": "2026-07-18T04:17:20Z",
+      "topics": [],
+      "fork": true,
       "homepage": null
     },
     {
@@ -68,7 +121,7 @@
       "stargazers_count": 0,
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/YaShua",
-      "updated_at": "2026-07-03T00:00:00Z",
+      "updated_at": "2026-07-03T08:16:28Z",
       "topics": [],
       "fork": false,
       "homepage": null
@@ -80,10 +133,10 @@
       "stargazers_count": 0,
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/ofcPap",
-      "updated_at": "2026-05-29T00:00:00Z",
+      "updated_at": "2026-05-29T02:31:42Z",
       "topics": [],
       "fork": false,
-      "homepage": null
+      "homepage": ""
     },
     {
       "name": "newthing",
@@ -92,19 +145,7 @@
       "stargazers_count": 0,
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/newthing",
-      "updated_at": "2026-05-28T00:00:00Z",
-      "topics": [],
-      "fork": false,
-      "homepage": null
-    },
-    {
-      "name": "PTCLI",
-      "description": "Cisco Packet Tracer CLI — 命令行管理 .pkt 文件和网络设备",
-      "language": "Python",
-      "stargazers_count": 0,
-      "forks_count": 0,
-      "html_url": "https://github.com/YAHU2024/PTCLI",
-      "updated_at": null,
+      "updated_at": "2026-05-28T12:05:47Z",
       "topics": [],
       "fork": false,
       "homepage": null
@@ -116,10 +157,22 @@
       "stargazers_count": 0,
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/PaiSmart",
-      "updated_at": null,
+      "updated_at": "2026-05-20T00:19:53Z",
       "topics": [],
       "fork": false,
       "homepage": null
+    },
+    {
+      "name": "MyResume",
+      "description": "Studying",
+      "language": null,
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "html_url": "https://github.com/YAHU2024/MyResume",
+      "updated_at": "2026-05-17T10:49:02Z",
+      "topics": [],
+      "fork": true,
+      "homepage": ""
     },
     {
       "name": "YahuDemo",
@@ -128,22 +181,29 @@
       "stargazers_count": 0,
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/YahuDemo",
-      "updated_at": null,
+      "updated_at": "2026-05-10T10:17:24Z",
       "topics": [],
       "fork": false,
       "homepage": null
     },
     {
       "name": "hello-world",
-      "description": "This is YAHU2024's first repository !",
+      "description": "This is YAHU2024‘s first repository !",
       "language": null,
       "stargazers_count": 0,
       "forks_count": 0,
       "html_url": "https://github.com/YAHU2024/hello-world",
-      "updated_at": null,
+      "updated_at": "2026-05-07T07:59:02Z",
       "topics": [],
       "fork": false,
       "homepage": null
     }
-  ]
+  ],
+  "releases": {
+    "myTool": {
+      "tag": "v1.9.4",
+      "publishedAt": "2026-10-13T00:08:04Z",
+      "url": "https://github.com/YAHU2024/myTool/releases/tag/v1.9.4"
+    }
+  }
 }

@@ -25,8 +25,12 @@ export interface ProjectItem {
   progress?: number
   /** 落地平台，如 ['Windows'] ['小程序', 'App']（专有名词，不翻译） */
   platform?: string[]
-  /** 补充信息，如「当前版本 v1.9.2」「暂无下载入口」 */
+  /** 补充信息。若含 {version} 占位符，渲染时替换为构建期快照抓到的最新 release tag（需配 releaseKey） */
   note?: L
+  /** 快照中无对应 release 数据时的兜底文案（一般为最后已知版本的种子值，CI 首次成功后基本不再触发） */
+  noteFallback?: L
+  /** 构建期动态版本号：对应 snapshot.json releases 段的 key（由 scripts/fetch-github.mjs 维护） */
+  releaseKey?: string
   /** 技术标签（专有名词，不翻译） */
   tags?: string[]
   /** 外链：repo = 源码，site = 官网 / 下载页 */
@@ -61,7 +65,9 @@ export const projects: ProjectItem[] = [
     platform: ['Windows'],
     tags: ['WPF', '.NET 8'],
     links: { site: 'https://yahu2024.github.io/myTool/', repo: 'https://github.com/YAHU2024/myTool' },
-    note: { zh: '当前版本 v1.9.2', en: 'Current version v1.9.2' },
+    releaseKey: 'myTool',
+    note: { zh: '当前版本 {version}', en: 'Current version {version}' },
+    noteFallback: { zh: '当前版本 v1.9.2', en: 'Current version v1.9.2' },
   },
   {
     name: { zh: '（想法位）', en: 'Placeholder' },
