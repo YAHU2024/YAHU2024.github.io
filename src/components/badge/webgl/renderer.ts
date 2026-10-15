@@ -502,8 +502,11 @@ export class BadgeRenderer {
     this.disposed = true
     this.canvas.removeEventListener('webglcontextlost', this.handleLost)
     this.canvas.removeEventListener('webglcontextrestored', this.handleRestored)
-    // 主动丢上下文，尽快释放移动端宝贵的 GL 资源
-    this.gl?.getExtension('WEBGL_lose_context')?.loseContext()
+    // 不主动 loseContext：React StrictMode（开发态）会在同一个 canvas 上
+    // 挂载→清理→再挂载，而 getContext 对同一元素永远返回同一个 context——
+    // 这里一旦 loseContext，第二次挂载的 renderer 拿到的是已丢失的 context，
+    // shader 编译必然失败（getShaderInfoLog 返回 null）→ 永久跌入 2D 兜底。
+    // canvas 从 DOM 摘除后 Chrome 会自行回收 context，无需手动释放。
     this.gl = null
   }
 }

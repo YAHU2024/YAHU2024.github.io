@@ -56,11 +56,20 @@ function ProjectCard({ p }: { p: ProjectItem }) {
     <GlassCard className="h-full p-7" tilt>
       <div className="gc-z1 mb-4 flex items-center justify-between gap-3">
         <span
-          className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl"
+          className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl text-2xl"
           style={{ background: 'var(--accent-soft)' }}
           aria-hidden
         >
-          {p.emoji}
+          {p.icon ? (
+            <img
+              src={p.icon}
+              alt=""
+              className="h-8 w-8 rounded-md object-contain"
+              draggable={false}
+            />
+          ) : (
+            p.emoji
+          )}
         </span>
         <StatusBadge status={p.status} />
       </div>

@@ -32,3 +32,5 @@ proposals/
 
 # internal docs
 /docs
+# playwright-cli 调试会话缓存
+.playwright-cli/

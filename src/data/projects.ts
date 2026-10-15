@@ -12,12 +12,15 @@
 // ─────────────────────────────────────────────────────────────
 
 import type { L } from '@/hooks/useLocale'
+import myToolLogo from '@/assets/quicktranslate-logo.png'
 
 export type ProjectStatus = 'doing' | 'shipped' | 'idea'
 
 export interface ProjectItem {
   name: L
   emoji: string
+  /** 自定义图标（图片 URL）。填了则卡片优先用图片，否则回落到 emoji */
+  icon?: string
   status: ProjectStatus
   /** 一句话说明：讲清「它是什么 / 现在到哪一步」 */
   oneLine: L
@@ -57,6 +60,7 @@ export const projects: ProjectItem[] = [
   {
     name: { zh: 'QuickTranslate', en: 'QuickTranslate' },
     emoji: '⚡',
+    icon: myToolLogo,
     status: 'shipped',
     oneLine: {
       zh: '划词翻译桌面工具，SSE 流式输出 + SQLite 历史 + 自动更新',
